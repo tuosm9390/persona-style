@@ -1,0 +1,160 @@
+import { Translations } from "./ko";
+
+export const en: Translations = {
+  common: {
+    startAnalysis: "Start Analysis",
+    seeExamples: "See Examples",
+    backToHome: "Back to Home",
+    backToList: "Back to List",
+    tryYourself: "Try Analysis for Free",
+    loading: "Loading...",
+    error: "An error occurred.",
+    delete: "Delete",
+    deleteAll: "Delete All",
+    confirmDelete: "Are you sure you want to delete this result?",
+    confirmDeleteAll: "Are you sure you want to delete all history? This action cannot be undone.",
+    language: "Language",
+    analyzing: "AI is analyzing...",
+    generatingImage: "AI is generating an image...",
+    regenerateImage: "Regenerate Image",
+    generateStyleImage: "Generate Style Image",
+    reset: "Analyze Again",
+    retryAnalysis: "Analyze Again",
+  },
+  header: {
+    title: "PersonaStyle",
+    menu: {
+      home: "Home",
+      analyze: "Analyze",
+      history: "History",
+      examples: "Examples",
+      about: "About",
+    },
+  },
+  hero: {
+    title: "Discover Your Perfect Personal Style",
+    subtitle: "AI analyzes your photo to diagnose your personal color, body type, and face shape, recommending the best styles and fashion items for you.",
+  },
+  home: {
+    badge: "AI-Powered Personal Styling",
+    title: {
+      prefix: "Discover Your",
+      highlight: "True Style Persona",
+      suffix: "",
+    },
+    description: "Analyze your features and personality with AI to find fashion and beauty styles that are uniquely yours.",
+    features: {
+      visualAnalysis: {
+        title: "Visual Analysis",
+        desc: "Upload your photo for AI to analyze your color season, face shape, and body proportions.",
+      },
+      personalityMatch: {
+        title: "Personality Match",
+        desc: "Describe your vibe and goals. We match your inner self with your outer style.",
+      },
+      actionableAdvice: {
+        title: "Actionable Advice",
+        desc: "Get specific recommendations for outfits, makeup, and hair that you can apply today.",
+      },
+    },
+  },
+  analyze: {
+    title: "Start Style Analysis",
+    description: "Upload a photo or describe yourself. AI will suggest a personalized style just for you.",
+    tabs: {
+      photo: "Photo Upload",
+      text: "Text Description",
+      both: "Photo + Text",
+    },
+    button: "Analyze",
+    photoInput: {
+      label: "Select Photo",
+      placeholder: "Click to upload or drag and drop",
+      change: "Change Photo",
+    },
+    analyzingConfig: "AI is analyzing your style. Please wait a moment...",
+    loading: {
+      uploading: "Processing your image...",
+      analyzing: "AI is analyzing your personal color and style...",
+      generating: "Finalizing your results...",
+    },
+    upload: {
+      drop: "Drop your photo here",
+      click: "or click to browse",
+      remove: "Remove image",
+      preview: "Uploaded preview",
+    },
+    textInput: {
+      label: "Style Concerns or Preferred Vibe",
+      placeholder: "e.g., I think I'm warm-toned. I usually dress casually but want to look more mature and sophisticated. Please recommend styles suitable for work as well.",
+      helper: "Be as descriptive as you like.",
+    },
+  },
+  result: {
+    badges: {
+      complete: "AI Analysis Complete",
+    },
+    analysis: {
+      title: "Analysis Results",
+      colorSeason: "Color Season",
+      bodyType: "Body Type",
+      faceShape: "Face Shape",
+      personalityVibe: "Personality Vibe",
+    },
+    fashion: {
+      title: "Fashion Recommendations",
+      tops: "Tops",
+      bottoms: "Bottoms",
+      outerwear: "Outerwear",
+      shoes: "Shoes",
+      accessories: "Accessories",
+      colorsToWear: "Colors to Wear",
+      colorsToAvoid: "Colors to Avoid",
+    },
+    beauty: {
+      title: "Beauty Recommendations",
+      foundation: "Base Makeup",
+      eyeMakeup: "Eye Makeup",
+      lipColor: "Lip Color",
+      blush: "Blush",
+      hairStyle: "Hairstyle",
+      hairColor: "Hair Color",
+    },
+    moodboard: {
+      title: "Style Moodboard",
+      palette: "Recommended Palette",
+      keywords: "Style Keywords",
+    },
+    actionItems: "Try These Today!",
+    image: {
+      title: "AI Style Example Image",
+      description: "AI generates a style example image based on the analysis.",
+      generate: "Generate Style Image",
+      generating: "AI is generating the image...",
+      regenerate: "Regenerate Image",
+    },
+  },
+  history: {
+    title: "Analysis History",
+    description: "Review your past style analysis results.",
+    deleteConfirm: "Are you sure you want to delete this result?",
+    clearAllConfirm: "Are you sure you want to delete all history? This action cannot be undone.",
+    empty: {
+      title: "No analysis history yet.",
+      desc: "Your analysis records will be saved here once you start.",
+    },
+    dateFormat: {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "numeric",
+      minute: "2-digit",
+    } as Intl.DateTimeFormatOptions,
+  },
+  examples: {
+    badge: "Style Inspiration",
+    title: "Style Analysis Examples",
+    description: "Check out AI analysis results for various color seasons and styles. Explore detailed fashion and beauty recommendations for each style.",
+    button: "Get Your Free Analysis",
+  },
+};

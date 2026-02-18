@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import Image from "next/image";
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -12,12 +13,31 @@ import {
   ListChecks,
   ChevronRight,
   ArrowLeft,
+  Circle,
+  Square,
+  Triangle,
+  Heart,
+  Diamond,
+  User,
+  Hourglass,
+  RectangleHorizontal,
+  Cloud,
+  Sun,
+  Moon,
+  Wind,
+  Watch,
+  Footprints,
+  Spline,
+  PanelTop,
 } from "lucide-react";
-import type { AnalysisResult } from "../../../lib/types";
+import type { AnalysisResult } from "@/lib/types";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { FormattedText } from "@/components/ui/formatted-text";
 
 interface AnalysisResultDisplayProps {
   result: AnalysisResult;
   onReset: () => void;
+  resetLabel?: string;
 }
 
 const sectionVariants = {
@@ -37,10 +57,225 @@ function ColorChip({ color }: { color: string }) {
   );
 }
 
+// Helper function to convert color names to CSS colors
+function getColorValue(colorName: string): string {
+  const normalizedColorName = colorName.toLowerCase();
+  const colorMap: Record<string, string> = {
+    // Neutrals
+    "화이트": "#FFFFFF", "white": "#FFFFFF",
+    "아이보리": "#FFFFF0", "ivory": "#FFFFF0",
+    "베이지": "#F5F5DC", "beige": "#F5F5DC",
+    "그레이": "#808080", "gray": "#808080", "grey": "#808080",
+    "차콜": "#36454F", "charcoal": "#36454F",
+    "블랙": "#000000", "black": "#000000",
+    "네이비": "#000080", "navy": "#000080",
+
+    // Warm colors
+    "레드": "#DC143C", "red": "#DC143C",
+    "코랄": "#FF7F50", "coral": "#FF7F50",
+    "피치": "#FFE5B4", "peach": "#FFE5B4",
+    "오렌지": "#FF8C00", "orange": "#FF8C00",
+    "옐로우": "#FFD700", "yellow": "#FFD700",
+    "골드": "#FFD700", "gold": "#FFD700",
+    "브라운": "#8B4513", "brown": "#8B4513",
+    "카키": "#C3B091", "khaki": "#C3B091",
+    "머스타드": "#FFDB58", "mustard": "#FFDB58",
+
+    // Cool colors
+    "블루": "#4169E1", "blue": "#4169E1",
+    "스카이블루": "#87CEEB", "skyblue": "#87CEEB", "sky blue": "#87CEEB",
+    "민트": "#98FF98", "mint": "#98FF98",
+    "그린": "#228B22", "green": "#228B22",
+    "올리브": "#808000", "olive": "#808000",
+    "퍼플": "#9370DB", "purple": "#9370DB",
+    "라벤더": "#E6E6FA", "lavender": "#E6E6FA",
+    "핑크": "#FFC0CB", "pink": "#FFC0CB",
+    "로즈": "#FF007F", "rose": "#FF007F",
+    "버건디": "#800020", "burgundy": "#800020",
+    "와인": "#722F37", "wine": "#722F37",
+    "플럼": "#8E4585", "plum": "#8E4585",
+    "실버": "#C0C0C0", "silver": "#C0C0C0",
+  };
+
+  // Try to find exact match first
+  for (const [key, value] of Object.entries(colorMap)) {
+    if (normalizedColorName.includes(key)) {
+      return value;
+    }
+  }
+
+  // Default to a gradient if no match
+  return "linear-gradient(135deg, #667eea 0%, #764ba2 100%)";
+}
+
+// Helper function to get icon for analysis types
+function getIconForType(type: string, value: string) {
+  const normalizedValue = value.toLowerCase();
+
+  switch (type) {
+    case "faceShape":
+      if (normalizedValue.includes("round") || normalizedValue.includes("둥근")) return <Circle className="h-5 w-5" />;
+      if (normalizedValue.includes("square") || normalizedValue.includes("각진")) return <Square className="h-5 w-5" />;
+      if (normalizedValue.includes("triangle") || normalizedValue.includes("역삼각형")) return <Triangle className="h-5 w-5 rotate-180" />;
+      if (normalizedValue.includes("heart") || normalizedValue.includes("하트")) return <Heart className="h-5 w-5" />;
+      if (normalizedValue.includes("diamond") || normalizedValue.includes("다이아")) return <Diamond className="h-5 w-5" />;
+      return <User className="h-5 w-5" />;
+
+    case "bodyType":
+      if (normalizedValue.includes("hourglass") || normalizedValue.includes("모래시계")) return <Hourglass className="h-5 w-5" />;
+      if (normalizedValue.includes("rectangle") || normalizedValue.includes("직사각형")) return <RectangleHorizontal className="h-5 w-5" />;
+      if (normalizedValue.includes("triangle") || normalizedValue.includes("삼각형")) return <Triangle className="h-5 w-5" />;
+      if (normalizedValue.includes("inverted") || normalizedValue.includes("역삼각형")) return <Triangle className="h-5 w-5 rotate-180" />;
+      if (normalizedValue.includes("round") || normalizedValue.includes("원형")) return <Circle className="h-5 w-5" />;
+      return <User className="h-5 w-5" />;
+
+    case "colorSeason":
+      if (normalizedValue.includes("spring") || normalizedValue.includes("봄")) return <Cloud className="h-5 w-5 text-green-400" />;
+      if (normalizedValue.includes("summer") || normalizedValue.includes("여름")) return <Sun className="h-5 w-5 text-yellow-400" />;
+      if (normalizedValue.includes("autumn") || normalizedValue.includes("fall") || normalizedValue.includes("가을")) return <Wind className="h-5 w-5 text-orange-400" />;
+      if (normalizedValue.includes("winter") || normalizedValue.includes("겨울")) return <Moon className="h-5 w-5 text-blue-400" />;
+      return <Palette className="h-5 w-5" />;
+
+    default:
+      return <Sparkles className="h-5 w-5" />;
+  }
+}
+
+// Helper function to get icon for fashion items
+function getFashionIcon(type: string) {
+  switch (type) {
+    case "tops":
+      return <Shirt className="h-5 w-5" />;
+    case "bottoms":
+      return <Spline className="h-5 w-5" />; // Spline for fit/curves/pants silhouette
+    case "outerwear":
+      return <PanelTop className="h-5 w-5" />; // PanelTop looks like covering/coat
+    case "shoes":
+      return <Footprints className="h-5 w-5" />;
+    case "accessories":
+      return <Watch className="h-5 w-5" />;
+    default:
+      return <Sparkles className="h-5 w-5" />;
+  }
+}
+
+// StyleImageSection component
+function StyleImageSection({ result }: { result: AnalysisResult }) {
+  const { t } = useLanguage();
+  const [isGenerating, setIsGenerating] = React.useState(false);
+  const [imageUrl, setImageUrl] = React.useState<string | null>(null);
+  const [error, setError] = React.useState<string | null>(null);
+
+  const handleGenerateImage = async () => {
+    setIsGenerating(true);
+    setError(null);
+
+    try {
+      const response = await fetch("/api/generate-image", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ result }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "이미지 생성에 실패했습니다.");
+      }
+
+      // Convert base64 image data to data URL for img tag rendering
+      if (data.imageData) {
+        const mimeType = data.mimeType || "image/png";
+        setImageUrl(`data:${mimeType};base64,${data.imageData}`);
+      }
+    } catch (err: any) {
+      setError(err.message || "이미지 생성 중 오류가 발생했습니다.");
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  return (
+    <motion.div
+      custom={4}
+      variants={sectionVariants}
+      initial="hidden"
+      animate="visible"
+    >
+      <Card className="border-primary/20">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <Sparkles className="h-5 w-5 text-primary" />
+            {t("result.image.title")}
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {!imageUrl && !isGenerating && (
+            <div className="text-center py-8">
+              <p className="text-sm text-muted-foreground mb-4">
+                {t("result.image.description")}
+              </p>
+              <Button
+                onClick={handleGenerateImage}
+                className="rounded-full"
+                size="lg"
+              >
+                <Sparkles className="mr-2 h-4 w-4" />
+                {t("result.image.generate")}
+              </Button>
+            </div>
+          )}
+
+          {isGenerating && (
+            <div className="flex flex-col items-center justify-center py-12 space-y-4">
+              <div className="animate-spin rounded-full h-12 w-12 border-4 border-primary border-t-transparent" />
+              <p className="text-sm text-muted-foreground">
+                {t("result.image.generating")}
+              </p>
+            </div>
+          )}
+
+          {imageUrl && (
+            <div className="space-y-4">
+              <div className="relative rounded-lg overflow-hidden border aspect-[3/4]">
+                <Image
+                  src={imageUrl}
+                  alt="AI Generated Style"
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 768px) 100vw, 500px"
+                />
+              </div>
+              <Button
+                variant="outline"
+                onClick={handleGenerateImage}
+                className="w-full"
+                disabled={isGenerating}
+              >
+                {t("result.image.regenerate")}
+              </Button>
+            </div>
+          )}
+
+          {error && (
+            <div className="rounded-lg bg-red-50 border border-red-200 p-4 text-center">
+              <p className="text-sm text-red-800">{error}</p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </motion.div>
+  );
+}
+
 export function AnalysisResultDisplay({
   result,
   onReset,
+  resetLabel,
 }: AnalysisResultDisplayProps) {
+  const { t } = useLanguage();
+  const actualResetLabel = resetLabel || t("common.retryAnalysis");
+
   return (
     <div className="mx-auto max-w-4xl space-y-8 pb-16">
       {/* Header */}
@@ -52,7 +287,7 @@ export function AnalysisResultDisplay({
       >
         <div className="inline-flex items-center rounded-full border px-3 py-1 text-xs font-semibold bg-secondary text-secondary-foreground">
           <Sparkles className="mr-1.5 h-3 w-3" />
-          AI 분석 완료
+          {t("result.badges.complete")}
         </div>
         <h1 className="text-3xl md:text-4xl font-display font-bold tracking-tight">
           {result.summary.title}
@@ -67,9 +302,10 @@ export function AnalysisResultDisplay({
             </span>
           ))}
         </div>
-        <p className="mx-auto max-w-[600px] text-muted-foreground leading-relaxed">
-          {result.summary.description}
-        </p>
+        <FormattedText
+          text={result.summary.description}
+          className="mx-auto max-w-[600px] text-muted-foreground text-left md:text-center"
+        />
       </motion.div>
 
       {/* Analysis Card */}
@@ -78,25 +314,31 @@ export function AnalysisResultDisplay({
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-lg">
               <Palette className="h-5 w-5 text-primary" />
-              분석 결과
+              {t("result.analysis.title")}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid gap-4 sm:grid-cols-2">
               {[
-                { label: "퍼스널 컬러", value: result.analysis.colorSeason },
-                { label: "체형 분석", value: result.analysis.bodyType },
-                { label: "얼굴형", value: result.analysis.faceShape },
+                { label: t("result.analysis.colorSeason"), value: result.analysis.colorSeason, type: "colorSeason" },
+                { label: t("result.analysis.bodyType"), value: result.analysis.bodyType, type: "bodyType" },
+                { label: t("result.analysis.faceShape"), value: result.analysis.faceShape, type: "faceShape" },
                 {
-                  label: "퍼스널리티 바이브",
+                  label: t("result.analysis.personalityVibe"),
                   value: result.analysis.personalityVibe,
+                  type: "personality"
                 },
               ].map((item, i) => (
-                <div key={i} className="rounded-lg bg-muted/50 p-4 space-y-1">
-                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                    {item.label}
-                  </p>
-                  <p className="text-sm font-medium">{item.value}</p>
+                <div key={i} className="flex items-start gap-4 rounded-lg bg-muted/50 p-4 transition-colors hover:bg-muted/70">
+                  <div className="mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-background shadow-sm text-primary">
+                    {getIconForType(item.type, item.value)}
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                      {item.label}
+                    </p>
+                    <p className="text-base font-medium">{item.value}</p>
+                  </div>
                 </div>
               ))}
             </div>
@@ -110,26 +352,38 @@ export function AnalysisResultDisplay({
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-lg">
               <Shirt className="h-5 w-5 text-primary" />
-              패션 추천
+              {t("result.fashion.title")}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
-            <p className="text-muted-foreground leading-relaxed">
-              {result.fashion.overview}
-            </p>
+            <FormattedText
+              as="div"
+              text={result.fashion.overview}
+              className="text-muted-foreground"
+            />
             <div className="grid gap-4 sm:grid-cols-2">
               {[
-                { label: "상의", value: result.fashion.tops },
-                { label: "하의", value: result.fashion.bottoms },
-                { label: "아우터", value: result.fashion.outerwear },
-                { label: "신발", value: result.fashion.shoes },
-                { label: "액세서리", value: result.fashion.accessories },
+                { label: t("result.fashion.tops"), value: result.fashion.tops, type: "tops" },
+                { label: t("result.fashion.bottoms"), value: result.fashion.bottoms, type: "bottoms" },
+                { label: t("result.fashion.outerwear"), value: result.fashion.outerwear, type: "outerwear" },
+                { label: t("result.fashion.shoes"), value: result.fashion.shoes, type: "shoes" },
+                { label: t("result.fashion.accessories"), value: result.fashion.accessories, type: "accessories" },
               ].map((item, i) => (
-                <div key={i} className="space-y-1">
-                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                    {item.label}
-                  </p>
-                  <p className="text-sm">{item.value}</p>
+                <div key={i} className="flex flex-col gap-3 rounded-lg bg-muted/50 p-4 transition-colors hover:bg-muted/70">
+                  <div className="flex items-center gap-2">
+                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-background shadow-sm text-primary">
+                      {getFashionIcon(item.type)}
+                    </div>
+                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                      {item.label}
+                    </p>
+                  </div>
+                  <div className="pl-10">
+                    <FormattedText
+                      text={item.value}
+                      className="text-sm font-medium"
+                    />
+                  </div>
                 </div>
               ))}
             </div>
@@ -137,7 +391,7 @@ export function AnalysisResultDisplay({
             <div className="border-t pt-4 space-y-3">
               <div>
                 <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
-                  어울리는 컬러
+                  {t("result.fashion.colorsToWear")}
                 </p>
                 <div className="flex flex-wrap gap-2">
                   {result.fashion.colorsToWear.map((c, i) => (
@@ -147,7 +401,7 @@ export function AnalysisResultDisplay({
               </div>
               <div>
                 <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
-                  피해야 할 컬러
+                  {t("result.fashion.colorsToAvoid")}
                 </p>
                 <div className="flex flex-wrap gap-2">
                   {result.fashion.colorsToAvoid.map((c, i) => (
@@ -166,21 +420,23 @@ export function AnalysisResultDisplay({
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-lg">
               <Gem className="h-5 w-5 text-primary" />
-              뷰티 추천
+              {t("result.beauty.title")}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
-            <p className="text-muted-foreground leading-relaxed">
-              {result.beauty.overview}
-            </p>
+            <FormattedText
+              as="div"
+              text={result.beauty.overview}
+              className="text-muted-foreground"
+            />
             <div className="grid gap-4 sm:grid-cols-2">
               {[
-                { label: "베이스 메이크업", value: result.beauty.foundation },
-                { label: "아이 메이크업", value: result.beauty.eyeMakeup },
-                { label: "립 컬러", value: result.beauty.lipColor },
-                { label: "블러셔", value: result.beauty.blush },
-                { label: "헤어 스타일", value: result.beauty.hairStyle },
-                { label: "헤어 컬러", value: result.beauty.hairColor },
+                { label: t("result.beauty.foundation"), value: result.beauty.foundation },
+                { label: t("result.beauty.eyeMakeup"), value: result.beauty.eyeMakeup },
+                { label: t("result.beauty.lipColor"), value: result.beauty.lipColor },
+                { label: t("result.beauty.blush"), value: result.beauty.blush },
+                { label: t("result.beauty.hairStyle"), value: result.beauty.hairStyle },
+                { label: t("result.beauty.hairColor"), value: result.beauty.hairColor },
               ].map((item, i) => (
                 <div key={i} className="space-y-1">
                   <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
@@ -194,13 +450,68 @@ export function AnalysisResultDisplay({
         </Card>
       </motion.div>
 
-      {/* Action Items */}
+      {/* Moodboard Section */}
       <motion.div custom={3} variants={sectionVariants} initial="hidden" animate="visible">
+        <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-transparent">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <Palette className="h-5 w-5 text-primary" />
+              {t("result.moodboard.title")}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            {/* Color Palette */}
+            <div>
+              <h4 className="text-sm font-semibold mb-3 text-muted-foreground">
+                {t("result.moodboard.palette")}
+              </h4>
+              <div className="grid grid-cols-3 md:grid-cols-6 gap-3">
+                {result.fashion.colorsToWear.map((color, i) => (
+                  <div key={i} className="flex flex-col items-center gap-2">
+                    <div
+                      className="w-16 h-16 rounded-lg shadow-md border border-border"
+                      style={{
+                        background: getColorValue(color),
+                      }}
+                    />
+                    <span className="text-xs text-center font-medium">
+                      {color}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Style Keywords */}
+            <div>
+              <h4 className="text-sm font-semibold mb-3 text-muted-foreground">
+                {t("result.moodboard.keywords")}
+              </h4>
+              <div className="flex flex-wrap gap-2">
+                {result.summary.keywords.map((keyword, i) => (
+                  <span
+                    key={i}
+                    className="rounded-full bg-primary/10 px-4 py-2 text-sm font-semibold text-primary border border-primary/20"
+                  >
+                    {keyword}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </motion.div>
+
+      {/* AI Generated Style Image */}
+      <StyleImageSection result={result} />
+
+      {/* Action Items */}
+      <motion.div custom={4} variants={sectionVariants} initial="hidden" animate="visible">
         <Card className="border-primary/20 bg-primary/5">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-lg">
               <ListChecks className="h-5 w-5 text-primary" />
-              오늘 바로 시도해보세요!
+              {t("result.actionItems")}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -231,7 +542,7 @@ export function AnalysisResultDisplay({
           className="rounded-full"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
-          다시 분석하기
+          {actualResetLabel}
         </Button>
       </motion.div>
     </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import Image from "next/image";
 import { Upload, X, Image as ImageIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -10,7 +11,10 @@ interface UploadFormProps {
   className?: string;
 }
 
+import { useLanguage } from "@/contexts/LanguageContext";
+
 export function UploadForm({ onImageSelect, className }: UploadFormProps) {
+  const { t } = useLanguage();
   const [preview, setPreview] = React.useState<string | null>(null);
   const [isDragging, setIsDragging] = React.useState(false);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
@@ -60,10 +64,12 @@ export function UploadForm({ onImageSelect, className }: UploadFormProps) {
 
       {preview ? (
         <div className="relative overflow-hidden rounded-lg border aspect-[3/4] group">
-          <img
+          <Image
             src={preview}
-            alt="Uploaded preview"
-            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+            alt={t("analyze.upload.preview")}
+            fill
+            className="object-cover transition-transform duration-500 group-hover:scale-105"
+            sizes="(max-width: 768px) 100vw, 300px"
           />
           <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
             <Button
@@ -71,6 +77,7 @@ export function UploadForm({ onImageSelect, className }: UploadFormProps) {
               size="icon"
               onClick={clearImage}
               className="rounded-full"
+              aria-label={t("analyze.upload.remove")}
             >
               <X className="h-4 w-4" />
             </Button>
@@ -96,10 +103,10 @@ export function UploadForm({ onImageSelect, className }: UploadFormProps) {
             <Upload className="h-8 w-8" />
           </div>
           <p className="text-sm font-medium text-foreground">
-            Drop your photo here
+            {t("analyze.upload.drop")}
           </p>
           <p className="text-xs text-muted-foreground mt-1">
-            or click to browse
+            {t("analyze.upload.click")}
           </p>
         </div>
       )}

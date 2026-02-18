@@ -4,9 +4,13 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Header } from "@/components/layout/Header";
+import { FormattedText } from "@/components/ui/formatted-text";
 import { ArrowRight, Sparkles, Upload } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function Home() {
+  const { t } = useLanguage();
+
   return (
     <div className="flex min-h-screen flex-col">
       <Header />
@@ -23,15 +27,15 @@ export default function Home() {
               >
                 <div className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80 mb-4">
                   <Sparkles className="mr-1 h-3 w-3" />
-                  AI-Powered Personal Styling
+                  {t("home.badge")}
                 </div>
-                <h1 className="text-4xl font-display font-bold tracking-tighter sm:text-5xl md:text-6xl lg:text-7xl">
-                  Discover Your <br className="hidden sm:inline" />
-                  <span className="text-primary">True Style Persona</span>
+                <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl">
+                  {t("hero.title")}
                 </h1>
-                <p className="mx-auto max-w-[700px] text-muted-foreground md:text-xl">
-                  Analyze your features and personality with AI to find fashion and beauty styles that are uniquely yours.
-                </p>
+                <FormattedText
+                  text={t("hero.subtitle")}
+                  className="mx-auto max-w-[700px] text-lg text-muted-foreground sm:text-xl text-center"
+                />
               </motion.div>
 
               <motion.div
@@ -40,13 +44,15 @@ export default function Home() {
                 transition={{ duration: 0.5, delay: 0.2 }}
                 className="flex flex-col gap-4 min-[400px]:flex-row"
               >
-                <Button size="lg" className="h-12 px-8 text-base" asChild>
-                  <Link href="/analyze">
-                    Start Analysis <ArrowRight className="ml-2 h-4 w-4" />
+                <Button size="lg" className="h-12 px-8 text-base w-full sm:w-auto" asChild>
+                  <Link href="/analyze" className="flex items-center justify-center gap-2">
+                    {t("common.startAnalysis")} <ArrowRight className="h-4 w-4" />
                   </Link>
                 </Button>
-                <Button variant="outline" size="lg" className="h-12 px-8 text-base">
-                  See Examples
+                <Button variant="outline" size="lg" className="h-12 px-8 text-base w-full sm:w-auto" asChild>
+                  <Link href="/examples">
+                    {t("common.seeExamples")}
+                  </Link>
                 </Button>
               </motion.div>
             </div>
@@ -62,18 +68,18 @@ export default function Home() {
             {[
               {
                 icon: Upload,
-                title: "Visual Analysis",
-                description: "Upload your photo for AI to analyze your color season, face shape, and body proportions."
+                title: t("home.features.visualAnalysis.title"),
+                description: t("home.features.visualAnalysis.desc")
               },
               {
                 icon: Sparkles,
-                title: "Personality Match",
-                description: "Describe your vibe and goals. We match your inner self with your outer style."
+                title: t("home.features.personalityMatch.title"),
+                description: t("home.features.personalityMatch.desc")
               },
               {
                 icon: ArrowRight,
-                title: "Actionable Advice",
-                description: "Get specific recommendations for outfits, makeup, and hair that you can apply today."
+                title: t("home.features.actionableAdvice.title"),
+                description: t("home.features.actionableAdvice.desc")
               }
             ].map((feature, index) => (
               <motion.div
@@ -88,7 +94,14 @@ export default function Home() {
                   <feature.icon className="h-6 w-6" />
                 </div>
                 <h3 className="font-bold text-xl mb-2">{feature.title}</h3>
-                <p className="text-muted-foreground">{feature.description}</p>
+                <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-secondary text-primary mb-4 group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
+                  <feature.icon className="h-6 w-6" />
+                </div>
+                <h3 className="font-bold text-xl mb-2">{feature.title}</h3>
+                <FormattedText
+                  text={feature.description}
+                  className="text-muted-foreground"
+                />
               </motion.div>
             ))}
           </div>

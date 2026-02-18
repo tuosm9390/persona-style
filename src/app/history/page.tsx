@@ -4,6 +4,7 @@ import * as React from "react";
 import { Header } from "@/components/layout/Header";
 import { AnalysisResultDisplay } from "@/components/features/AnalysisResult";
 import { Button } from "@/components/ui/button";
+import { FormattedText } from "@/components/ui/formatted-text";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { motion, AnimatePresence } from "framer-motion";
 import { Clock, Trash2, Camera, PenLine, Sparkles } from "lucide-react";
@@ -12,9 +13,11 @@ import {
   deleteAnalysisFromHistory,
   clearAllHistory,
   type AnalysisHistoryItem,
-} from "../../../lib/history";
+} from "@/lib/history";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function HistoryPage() {
+  const { t } = useLanguage();
   const [history, setHistory] = React.useState<AnalysisHistoryItem[]>([]);
   const [selectedItem, setSelectedItem] = React.useState<AnalysisHistoryItem | null>(null);
 
@@ -57,6 +60,49 @@ export default function HistoryPage() {
     return <Sparkles className="h-4 w-4" />;
   };
 
+  const handleSelectItem = (item: AnalysisHistoryItem) => {
+    setSelectedItem(item);
+    // Push a new history entry so browser back button returns to the list
+    window.history.pushState({ viewing: item.id }, "", `/history?id=${item.id}`);
+  };
+
+  const handleBackToList = React.useCallback(() => {
+    setSelectedItem(null);
+    // Replace URL back to clean /history without triggering another pushState
+    window.history.replaceState(null, "", "/history");
+  }, []);
+
+  // Listen for browser back/forward button
+  React.useEffect(() => {
+    const handlePopState = (event: PopStateEvent) => {
+      if (event.state?.viewing) {
+        // Forward navigation to a specific item
+        const item = history.find((h) => h.id === event.state.viewing);
+        if (item) {
+          setSelectedItem(item);
+        }
+      } else {
+        // Back to list
+        setSelectedItem(null);
+      }
+    };
+
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, [history]);
+
+  // On initial load, check if URL has an id parameter (for direct links / page refresh)
+  React.useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get("id");
+    if (id && history.length > 0) {
+      const item = history.find((h) => h.id === id);
+      if (item) {
+        setSelectedItem(item);
+      }
+    }
+  }, [history]);
+
   if (selectedItem) {
     return (
       <div className="flex min-h-screen flex-col bg-muted/30">
@@ -64,7 +110,8 @@ export default function HistoryPage() {
         <main className="container flex-1 py-12 px-4 md:px-6">
           <AnalysisResultDisplay
             result={selectedItem.result}
-            onReset={() => setSelectedItem(null)}
+            onReset={handleBackToList}
+            resetLabel="목록으로 돌아가기"
           />
         </main>
       </div>
@@ -85,11 +132,12 @@ export default function HistoryPage() {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-display font-bold tracking-tight md:text-4xl">
-                분석 기록
+                {t("history.title")}
               </h1>
-              <p className="text-muted-foreground mt-2">
-                과거에 받았던 스타일 분석 결과를 다시 확인하세요.
-              </p>
+              <FormattedText
+                text={t("history.description")}
+                className="text-muted-foreground mt-2"
+              />
             </div>
             {history.length > 0 && (
               <Button
@@ -131,7 +179,7 @@ export default function HistoryPage() {
                     <Card className="hover:border-primary/50 transition-colors cursor-pointer group">
                       <CardHeader
                         className="pb-3"
-                        onClick={() => setSelectedItem(item)}
+                        onClick={() => handleSelectItem(item)}
                       >
                         <div className="flex items-start justify-between">
                           <div className="flex-1">
@@ -159,7 +207,7 @@ export default function HistoryPage() {
                       </CardHeader>
                       <CardContent
                         className="pt-0"
-                        onClick={() => setSelectedItem(item)}
+                        onClick={() => handleSelectItem(item)}
                       >
                         <div className="flex flex-wrap gap-2">
                           {item.result.summary.keywords.map((keyword, i) => (

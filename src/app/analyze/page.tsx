@@ -13,20 +13,24 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { FormattedText } from "@/components/ui/formatted-text";
 import { Sparkles, Loader2, Camera, PenLine } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import type { AnalysisResult } from "../../../lib/types";
+import type { AnalysisResult } from "@/lib/types";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { toast } from "sonner";
 
 type AnalysisMode = "photo" | "text";
 
 export default function AnalyzePage() {
+  const { t, language } = useLanguage();
   const [mode, setMode] = React.useState<AnalysisMode>("photo");
   const [image, setImage] = React.useState<File | null>(null);
   const [imageBase64, setImageBase64] = React.useState<string>("");
   const [text, setText] = React.useState("");
   const [isAnalyzing, setIsAnalyzing] = React.useState(false);
+  const [loadingStep, setLoadingStep] = React.useState<string>("");
   const [result, setResult] = React.useState<AnalysisResult | null>(null);
-  const [error, setError] = React.useState<string | null>(null);
 
   const handleImageSelect = (file: File | null) => {
     setImage(file);
@@ -43,43 +47,53 @@ export default function AnalyzePage() {
 
   const handleAnalyze = async () => {
     if (!imageBase64 && !text) {
-      setError("사진을 업로드하거나 자기소개를 입력해주세요.");
+      toast.error(t("analyze.error.noInput") || "사진을 업로드하거나 자기소개를 입력해주세요.");
       return;
     }
 
     setIsAnalyzing(true);
-    setError(null);
+    setLoadingStep("uploading");
 
     try {
+      // Short delay to show uploading state
+      await new Promise(resolve => setTimeout(resolve, 800));
+
+      setLoadingStep("analyzing");
       const response = await fetch("/api/analyze", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           image: imageBase64 || undefined,
           text: text || undefined,
+          language,
         }),
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || "분석 중 오류가 발생했습니다.");
+        throw new Error(data.error || t("common.error"));
       }
+
+      setLoadingStep("generating");
+      // Simulate finishing step
+      await new Promise(resolve => setTimeout(resolve, 800));
 
       setResult(data.result);
 
       // Save to history
       const inputType = imageBase64 && text ? "combined" : imageBase64 ? "photo" : "text";
       if (typeof window !== "undefined") {
-        const { saveAnalysisToHistory } = await import("../../../lib/history");
+        const { saveAnalysisToHistory } = await import("@/lib/history");
         saveAnalysisToHistory(data.result, inputType);
       }
     } catch (err: unknown) {
       const message =
-        err instanceof Error ? err.message : "분석 중 오류가 발생했습니다.";
-      setError(message);
+        err instanceof Error ? err.message : t("common.error");
+      toast.error(message);
     } finally {
       setIsAnalyzing(false);
+      setLoadingStep("");
     }
   };
 
@@ -88,7 +102,6 @@ export default function AnalyzePage() {
     setImage(null);
     setImageBase64("");
     setText("");
-    setError(null);
   };
 
   if (result) {
@@ -115,12 +128,15 @@ export default function AnalyzePage() {
           {/* Title */}
           <div className="text-center space-y-2">
             <h1 className="text-3xl font-display font-bold tracking-tight md:text-4xl">
-              나만의 스타일을 찾아보세요
+              {t("analyze.title")}
             </h1>
-            <p className="text-muted-foreground max-w-[600px] mx-auto">
-              사진을 업로드하거나 자기소개를 작성해주세요.
-              AI가 당신에게 가장 어울리는 패션과 뷰티 스타일을 추천해드립니다.
-            </p>
+            <h1 className="text-3xl font-display font-bold tracking-tight md:text-4xl">
+              {t("analyze.title")}
+            </h1>
+            <FormattedText
+              text={t("analyze.description")}
+              className="text-muted-foreground max-w-[600px] mx-auto"
+            />
           </div>
 
           {/* Mode Selector */}
@@ -131,7 +147,7 @@ export default function AnalyzePage() {
               className="rounded-full"
             >
               <Camera className="mr-2 h-4 w-4" />
-              사진으로 분석
+              {t("analyze.tabs.photo")}
             </Button>
             <Button
               variant={mode === "text" ? "default" : "outline"}
@@ -139,7 +155,7 @@ export default function AnalyzePage() {
               className="rounded-full"
             >
               <PenLine className="mr-2 h-4 w-4" />
-              자기소개로 분석
+              {t("analyze.tabs.text")}
             </Button>
           </div>
 
@@ -159,10 +175,10 @@ export default function AnalyzePage() {
                     <CardHeader>
                       <CardTitle className="flex items-center gap-2">
                         <Camera className="h-5 w-5 text-primary" />
-                        사진 업로드
+                        {t("analyze.tabs.photo")}
                       </CardTitle>
                       <CardDescription>
-                        전신 또는 얼굴 사진을 업로드해주세요.
+                        <FormattedText as="span" text={t("analyze.description")} />
                       </CardDescription>
                     </CardHeader>
                     <CardContent>
@@ -173,11 +189,10 @@ export default function AnalyzePage() {
                     <CardHeader>
                       <CardTitle className="flex items-center gap-2">
                         <PenLine className="h-5 w-5 text-primary" />
-                        추가 설명 (선택)
+                        {t("analyze.tabs.text")}
                       </CardTitle>
                       <CardDescription>
-                        원하는 스타일이나 상황을 알려주시면 더 정확한 추천이
-                        가능해요.
+                        {t("analyze.textInput.label")}
                       </CardDescription>
                     </CardHeader>
                     <CardContent>
@@ -190,11 +205,10 @@ export default function AnalyzePage() {
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <PenLine className="h-5 w-5 text-primary" />
-                      자기소개
+                      {t("analyze.tabs.text")}
                     </CardTitle>
                     <CardDescription>
-                      피부톤, 체형, 성격, 선호하는 분위기, 스타일링이 필요한
-                      상황 등을 자유롭게 작성해주세요.
+                      {t("analyze.textInput.label")}
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
@@ -205,19 +219,7 @@ export default function AnalyzePage() {
             </motion.div>
           </AnimatePresence>
 
-          {/* Error */}
-          {error && (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="mx-auto max-w-md rounded-xl border border-red-200 bg-red-50 p-5 text-center space-y-3"
-            >
-              <p className="text-sm font-medium text-red-800">{error}</p>
-              <p className="text-xs text-red-600/70">
-                문제가 지속되면 잠시 후 다시 시도해주세요.
-              </p>
-            </motion.div>
-          )}
+
 
           {/* Submit */}
           <div className="flex justify-center pt-4">
@@ -233,12 +235,12 @@ export default function AnalyzePage() {
               {isAnalyzing ? (
                 <>
                   <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                  AI 분석 중...
+                  {t(`analyze.loading.${loadingStep}`) || t("common.analyzing")}
                 </>
               ) : (
                 <>
                   <Sparkles className="mr-2 h-5 w-5" />
-                  스타일 분석 시작
+                  {t("analyze.button")}
                 </>
               )}
             </Button>

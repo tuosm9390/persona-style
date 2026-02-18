@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getGeminiModel, FALLBACK_MODELS } from "../../../../lib/gemini";
+import { getGeminiModel, FALLBACK_MODELS } from "@/lib/gemini";
 import {
-  IMAGE_ANALYSIS_PROMPT,
-  TEXT_ANALYSIS_PROMPT,
-  COMBINED_ANALYSIS_PROMPT,
-} from "../../../../lib/prompts";
+  getTextAnalysisPrompt,
+  getImageAnalysisPrompt,
+  getCombinedAnalysisPrompt,
+} from "@/lib/prompts";
+import { ko } from "@/lib/i18n/ko";
+import { en } from "@/lib/i18n/en";
 
 /**
  * Parse Gemini API retry delay from error message
@@ -31,7 +33,7 @@ function isDailyQuotaExhausted(errorMessage?: string): boolean {
 /**
  * Build the prompt array based on input type
  */
-function buildPrompt(image?: string, text?: string) {
+function buildPrompt(image?: string, text?: string, language: string = "ko") {
   if (image && text) {
     const imageData = image.split(",")[1] || image;
     const mimeType = image.startsWith("data:")
@@ -39,7 +41,7 @@ function buildPrompt(image?: string, text?: string) {
       : "image/jpeg";
     return [
       { inlineData: { mimeType, data: imageData } },
-      `${COMBINED_ANALYSIS_PROMPT}\n\n${text}`,
+      getCombinedAnalysisPrompt(language) + `\n\n${text}`,
     ];
   } else if (image) {
     const imageData = image.split(",")[1] || image;
@@ -48,26 +50,31 @@ function buildPrompt(image?: string, text?: string) {
       : "image/jpeg";
     return [
       { inlineData: { mimeType, data: imageData } },
-      IMAGE_ANALYSIS_PROMPT,
+      getImageAnalysisPrompt(language),
     ];
   } else {
-    return `${TEXT_ANALYSIS_PROMPT}\n\n${text}`;
+    return getTextAnalysisPrompt(language) + `\n\n${text}`;
   }
 }
 
 export async function POST(request: NextRequest) {
+  let language = "ko";
   try {
     const body = await request.json();
-    const { image, text } = body as { image?: string; text?: string };
+    const { image, text, language: langParam } = body as { image?: string; text?: string; language?: string };
+    if (langParam) language = langParam;
+
+    // Translation helper for error messages
+    const t = language === "ko" ? ko : en;
 
     if (!image && !text) {
       return NextResponse.json(
-        { error: "이미지 또는 텍스트를 입력해주세요." },
+        { error: "Image or text input is required." },
         { status: 400 }
       );
     }
 
-    const prompt = buildPrompt(image, text);
+    const prompt = buildPrompt(image, text, language);
     let lastError: any = null;
 
     // Try each model in fallback order
@@ -144,7 +151,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       {
         error:
-          "현재 AI 서비스 사용량이 일시적으로 제한되었습니다. 잠시 후 다시 시도해주세요. (약 1~2분 후 재시도를 권장합니다)",
+          language === "ko"
+            ? "현재 AI 서비스 사용량이 모두 소진되었습니다. 잠시 후 다시 시도해주세요."
+            : "AI service quota exhausted. Please try again later.",
         errorType: "RATE_LIMIT",
       },
       { status: 429 }
@@ -152,26 +161,33 @@ export async function POST(request: NextRequest) {
   } catch (error: unknown) {
     console.error("Analysis error:", error);
 
-    // User-friendly Korean error messages
-    let message = "분석 중 오류가 발생했습니다.";
+    // Basic map for error messages based on language
+    const isKo = language === "ko";
+    let message = isKo ? "분석 중 오류가 발생했습니다." : "An error occurred during analysis.";
     let statusCode = 500;
 
     if (error instanceof Error) {
       if (error.message.includes("API key")) {
-        message = "API 키가 설정되지 않았습니다. 관리자에게 문의하세요.";
+        message = isKo
+          ? "API 키가 설정되지 않았습니다. 관리자에게 문의하세요."
+          : "API Key is missing. Please contact administrator.";
         statusCode = 401;
       } else if (error.message.includes("JSON")) {
-        message =
-          "AI 응답을 처리하는 중 오류가 발생했습니다. 다시 시도해주세요.";
+        message = isKo
+          ? "AI 응답을 처리하는 중 오류가 발생했습니다. 다시 시도해주세요."
+          : "Failed to parse AI response. Please try again.";
       } else if (
         error.message.includes("429") ||
         error.message.includes("quota")
       ) {
-        message =
-          "현재 AI 서비스 사용량이 일시적으로 제한되었습니다. 약 1~2분 후 다시 시도해주세요.";
+        message = isKo
+          ? "현재 AI 서비스 사용량이 일시적으로 제한되었습니다. 약 1~2분 후 다시 시도해주세요."
+          : "AI service temporarily limited. Please try again in 1-2 minutes.";
         statusCode = 429;
       } else if (error.message.includes("fetch")) {
-        message = "AI 서버에 연결할 수 없습니다. 인터넷 연결을 확인해주세요.";
+        message = isKo
+          ? "AI 서버에 연결할 수 없습니다. 인터넷 연결을 확인해주세요."
+          : "Cannot connect to AI server. Please check your internet connection.";
         statusCode = 503;
       }
     }

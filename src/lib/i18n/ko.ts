@@ -1,0 +1,160 @@
+export const ko = {
+  common: {
+    startAnalysis: "분석 시작하기",
+    seeExamples: "예시 보기",
+    backToHome: "메인으로 돌아가기",
+    backToList: "목록으로 돌아가기",
+    tryYourself: "나도 무료로 분석 받기",
+    loading: "로딩 중...",
+    error: "오류가 발생했습니다.",
+    delete: "삭제",
+    deleteAll: "전체 삭제",
+    confirmDelete: "이 분석 결과를 삭제하시겠습니까?",
+    confirmDeleteAll: "모든 분석 기록을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.",
+    language: "언어",
+    analyzing: "AI가 분석 중입니다...",
+    generatingImage: "AI가 이미지를 생성하고 있습니다...",
+    regenerateImage: "다시 생성하기",
+    generateStyleImage: "스타일 이미지 생성하기",
+    reset: "다시 분석하기",
+    retryAnalysis: "다시 분석하기",
+  },
+  header: {
+    title: "PersonaStyle",
+    menu: {
+      home: "홈",
+      analyze: "분석하기",
+      history: "기록",
+      examples: "예시",
+      about: "소개",
+    },
+  },
+  hero: {
+    title: "나에게 딱 맞는 퍼스널 스타일을 찾아보세요",
+    subtitle: "AI가 당신의 사진을 분석하여 퍼스널 컬러, 체형, 얼굴형을 진단하고 가장 잘 어울리는 스타일과 패션 아이템을 추천해드립니다.",
+  },
+  home: {
+    badge: "AI 퍼스널 스타일링",
+    title: {
+      prefix: "나에게 딱 맞는",
+      highlight: "퍼스널 스타일",
+      suffix: "을 찾아보세요",
+    },
+    description: "AI가 당신의 사진을 분석하여 퍼스널 컬러, 체형, 얼굴형을 진단하고\n가장 잘 어울리는 스타일과 패션 아이템을 추천해드립니다.",
+    features: {
+      visualAnalysis: {
+        title: "비주얼 분석",
+        desc: "사진을 업로드하면 AI가 퍼스널 컬러, 얼굴형, 체형을 분석합니다.",
+      },
+      personalityMatch: {
+        title: "성향 매칭",
+        desc: "당신의 분위기와 목표를 설명해주세요. 내면과 외면이 조화로운 스타일을 제안합니다.",
+      },
+      actionableAdvice: {
+        title: "실용적인 조언",
+        desc: "당장 적용할 수 있는 구체적인 코디, 메이크업, 헤어 스타일 추천을 받아보세요.",
+      },
+    },
+  },
+  analyze: {
+    title: "스타일 분석 시작하기",
+    description: "사진을 업로드하거나 자신에 대해 설명해주세요. AI가 당신을 위한 맞춤형 스타일을 제안합니다.",
+    tabs: {
+      photo: "사진 업로드",
+      text: "텍스트 설명",
+      both: "사진 + 텍스트",
+    },
+    button: "분석하기",
+    photoInput: {
+      label: "사진 선택",
+      placeholder: "클릭하여 사진 업로드 또는 드래그 앤 드롭",
+      change: "사진 변경",
+    },
+    analyzingConfig: "AI가 당신의 스타일을 분석하고 있습니다. 잠시만 기다려주세요...",
+    loading: {
+      uploading: "이미지를 처리하고 있습니다...",
+      analyzing: "AI가 퍼스널 컬러와 스타일을 분석 중입니다...",
+      generating: "분석 결과를 정리하고 있습니다...",
+    },
+    upload: {
+      drop: "사진을 여기에 놓으세요",
+      click: "또는 클릭하여 찾아보기",
+      remove: "이미지 제거",
+      preview: "업로드된 미리보기",
+    },
+    textInput: {
+      label: "나의 스타일 고민이나 선호하는 분위기",
+      placeholder: "예: 저는 웜톤인 것 같고, 평소에는 캐주얼하게 입지만 좀 더 어른스럽고 세련된 느낌을 주고 싶어요. 직장에서도 입을 수 있는 스타일을 추천해주세요.",
+      helper: "자유롭게 설명해주세요.",
+    },
+  },
+  result: {
+    badges: {
+      complete: "AI 분석 완료",
+    },
+    analysis: {
+      title: "분석 결과",
+      colorSeason: "퍼스널 컬러",
+      bodyType: "체형 분석",
+      faceShape: "얼굴형",
+      personalityVibe: "퍼스널리티 바이브",
+    },
+    fashion: {
+      title: "패션 추천",
+      tops: "상의",
+      bottoms: "하의",
+      outerwear: "아우터",
+      shoes: "신발",
+      accessories: "액세서리",
+      colorsToWear: "어울리는 컬러",
+      colorsToAvoid: "피해야 할 컬러",
+    },
+    beauty: {
+      title: "뷰티 추천",
+      foundation: "베이스 메이크업",
+      eyeMakeup: "아이 메이크업",
+      lipColor: "립 컬러",
+      blush: "블러셔",
+      hairStyle: "헤어 스타일",
+      hairColor: "헤어 컬러",
+    },
+    moodboard: {
+      title: "스타일 무드보드",
+      palette: "추천 컬러 팔레트",
+      keywords: "스타일 키워드",
+    },
+    actionItems: "오늘 바로 시도해보세요!",
+    image: {
+      title: "AI 스타일 예시 이미지",
+      description: "AI가 분석 결과를 바탕으로 스타일 예시 이미지를 생성합니다.",
+      generate: "스타일 이미지 생성하기",
+      generating: "AI가 이미지를 생성하고 있습니다...",
+      regenerate: "다시 생성하기",
+    },
+  },
+  history: {
+    title: "분석 기록",
+    description: "과거에 받았던 스타일 분석 결과를 다시 확인하세요.",
+    deleteConfirm: "이 분석 결과를 삭제하시겠습니까?",
+    clearAllConfirm: "모든 분석 기록을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.",
+    empty: {
+      title: "아직 분석 기록이 없습니다.",
+      desc: "스타일 분석을 시작하면 여기에 기록이 저장됩니다.",
+    },
+    dateFormat: {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    } as Intl.DateTimeFormatOptions,
+  },
+  examples: {
+    badge: "Style Inspiration",
+    title: "스타일 분석 예시",
+    description: "다양한 퍼스널 컬러와 스타일에 따른 AI 분석 결과를 미리 확인해보세요. 각 스타일에 맞는 패션, 뷰티 추천을 자세히 살펴볼 수 있습니다.",
+    button: "나도 무료로 분석 받기",
+  },
+};
+
+export type Translations = typeof ko;

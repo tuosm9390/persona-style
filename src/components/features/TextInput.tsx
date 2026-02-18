@@ -10,17 +10,21 @@ interface TextInputProps {
   value?: string;
 }
 
+import { useLanguage } from "@/contexts/LanguageContext";
+
 export function TextInput({ onTextChange, className, value }: TextInputProps) {
+  const { t } = useLanguage();
+
   return (
     <div className={cn("space-y-2", className)}>
       <Textarea
-        placeholder="Describe yourself... (e.g., 'I have a warm skin tone and I'm looking for a professional yet stylish outfit for a job interview at a tech startup.')"
+        placeholder={t("analyze.textInput.placeholder")}
         className="min-h-[200px] resize-none text-base leading-relaxed p-4"
         onChange={(e) => onTextChange(e.target.value)}
         value={value}
       />
       <p className="text-xs text-muted-foreground text-right">
-        Be as descriptive as you like.
+        {t("analyze.textInput.helper")}
       </p>
     </div>
   );
