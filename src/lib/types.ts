@@ -1,4 +1,5 @@
 export interface AnalysisResult {
+  id?: string;
   summary: {
     title: string;
     keywords: string[];
