@@ -1,31 +1,24 @@
 import { MetadataRoute } from 'next'
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
-  return [
-    {
-      url: baseUrl,
-      lastModified: new Date(),
-      changeFrequency: 'monthly',
-      priority: 1,
-    },
-    {
-      url: `${baseUrl}/analyze`,
-      lastModified: new Date(),
-      changeFrequency: 'monthly',
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/examples`,
-      lastModified: new Date(),
-      changeFrequency: 'monthly',
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/history`,
-      lastModified: new Date(),
-      changeFrequency: 'daily',
-      priority: 0.5,
-    },
+  const baseUrl = 'https://personastyle.vercel.app'
+  
+  // 정적 경로 리스트
+  const routes = [
+    '',
+    '/analyze',
+    '/examples',
+    '/about',
+    '/guide',
+    '/history',
+    '/privacy',
+    '/terms',
   ]
+
+  return routes.map((route) => ({
+    url: `${baseUrl}${route}`,
+    lastModified: new Date(),
+    changeFrequency: route === '' ? 'daily' : 'weekly' as any,
+    priority: route === '' ? 1 : 0.8,
+  }))
 }

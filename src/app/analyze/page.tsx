@@ -19,6 +19,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import type { AnalysisResult } from "@/lib/types";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { toast } from "sonner";
+import { compressImage } from "@/lib/utils";
 
 type AnalysisMode = "photo" | "text";
 
@@ -32,14 +33,22 @@ export default function AnalyzePage() {
   const [loadingStep, setLoadingStep] = React.useState<string>("");
   const [result, setResult] = React.useState<AnalysisResult | null>(null);
 
-  const handleImageSelect = (file: File | null) => {
+  const handleImageSelect = async (file: File | null) => {
     setImage(file);
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImageBase64(reader.result as string);
-      };
-      reader.readAsDataURL(file);
+      try {
+        // Compress image before setting it to base64
+        const compressed = await compressImage(file, 1024, 0.7);
+        setImageBase64(compressed);
+      } catch (err) {
+        console.error("Compression error:", err);
+        // Fallback to original reader if compression fails
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setImageBase64(reader.result as string);
+        };
+        reader.readAsDataURL(file);
+      }
     } else {
       setImageBase64("");
     }
@@ -130,9 +139,6 @@ export default function AnalyzePage() {
             <h1 className="text-3xl font-display font-bold tracking-tight md:text-4xl">
               {t("analyze.title")}
             </h1>
-            <h1 className="text-3xl font-display font-bold tracking-tight md:text-4xl">
-              {t("analyze.title")}
-            </h1>
             <FormattedText
               text={t("analyze.description")}
               className="text-muted-foreground max-w-[600px] mx-auto"
@@ -177,9 +183,6 @@ export default function AnalyzePage() {
                         <Camera className="h-5 w-5 text-primary" />
                         {t("analyze.tabs.photo")}
                       </CardTitle>
-                      <CardDescription>
-                        <FormattedText as="span" text={t("analyze.description")} />
-                      </CardDescription>
                     </CardHeader>
                     <CardContent>
                       <UploadForm onImageSelect={handleImageSelect} />

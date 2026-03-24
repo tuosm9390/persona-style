@@ -31,6 +31,15 @@ function isDailyQuotaExhausted(errorMessage?: string): boolean {
 }
 
 /**
+ * Check if the error indicates the project has exceeded its spending cap.
+ * This is a hard limit at the project level.
+ */
+function isSpendingCapExceeded(errorMessage?: string): boolean {
+  if (!errorMessage) return false;
+  return errorMessage.includes("exceeded its spending cap") || errorMessage.includes("billing");
+}
+
+/**
  * Build the prompt array based on input type
  */
 function buildPrompt(image?: string, text?: string, language: string = "ko") {
@@ -112,6 +121,21 @@ export async function POST(request: NextRequest) {
             error.status === 429 || error.message?.includes("429");
 
           if (is429) {
+            // Check for Hard Project Limits (Spending Cap)
+            if (isSpendingCapExceeded(error.message)) {
+              console.error("🚨 PROJECT CRITICAL: Spending cap exceeded. All Gemini requests blocked.");
+              return NextResponse.json(
+                {
+                  error:
+                    language === "ko"
+                      ? "AI 서비스 운영 비용 한도가 초과되었습니다. 관리자에게 문의하거나 잠시 후 다시 시도해주세요."
+                      : "AI service spending cap exceeded. Please contact the administrator.",
+                  errorType: "SPENDING_CAP",
+                },
+                { status: 429 }
+              );
+            }
+
             // If daily quota is fully gone (limit: 0), skip to next model
             if (isDailyQuotaExhausted(error.message)) {
               console.log(

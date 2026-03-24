@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { Header } from "@/components/layout/Header";
+import { Footer } from "@/components/layout/Footer";
 import { AnalysisResultDisplay } from "@/components/features/AnalysisResult";
 import { Button } from "@/components/ui/button";
 import { FormattedText } from "@/components/ui/formatted-text";
@@ -22,13 +23,18 @@ export default function HistoryPage() {
   const [selectedItem, setSelectedItem] = React.useState<AnalysisHistoryItem | null>(null);
 
   React.useEffect(() => {
-    setHistory(getAnalysisHistory());
+    const fetchHistory = async () => {
+      const data = await getAnalysisHistory();
+      setHistory(data);
+    };
+    fetchHistory();
   }, []);
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (confirm("이 분석 결과를 삭제하시겠습니까?")) {
-      deleteAnalysisFromHistory(id);
-      setHistory(getAnalysisHistory());
+      await deleteAnalysisFromHistory(id);
+      const updatedHistory = await getAnalysisHistory();
+      setHistory(updatedHistory);
       if (selectedItem?.id === id) {
         setSelectedItem(null);
       }
@@ -231,6 +237,7 @@ export default function HistoryPage() {
           )}
         </motion.div>
       </main>
+      <Footer />
     </div>
   );
 }

@@ -16,24 +16,38 @@ const outfit = Outfit({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://personastyle.vercel.app"),
   title: {
-    default: "PersonaStyle - AI Personal Styling",
+    default: "PersonaStyle - AI Personal Style & Color Analysis",
     template: "%s | PersonaStyle",
   },
-  description: "Discover your best look with AI-powered personal styling and color analysis.",
+  description: "AI 기반 퍼스널 컬러 및 스타일 분석 서비스. 당신에게 가장 잘 어울리는 색상과 패션 스타일을 AI가 제안합니다.",
+  keywords: ["AI 퍼스널컬러", "스타일 분석", "AI 패션", "퍼스널 스타일링", "Personal Color Analysis", "AI Style Guide"],
   openGraph: {
     type: "website",
     locale: "ko_KR",
-    url: "/",
-    title: "PersonaStyle - AI 퍼스널 스타일링",
-    description: "AI가 분석해주는 나만의 퍼스널 컬러와 스타일. 지금 바로 확인해보세요.",
+    url: "https://personastyle.vercel.app",
+    title: "PersonaStyle - AI 퍼스널 스타일 & 컬러 분석",
+    description: "사진 한 장으로 확인하는 나만의 퍼스널 스타일. AI가 제안하는 완벽한 룩을 만나보세요.",
     siteName: "PersonaStyle",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "PersonaStyle - AI Styling",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "PersonaStyle - AI 퍼스널 스타일링",
-    description: "AI가 분석해주는 나만의 퍼스널 컬러와 스타일.",
+    title: "PersonaStyle - AI 퍼스널 스타일 & 컬러 분석",
+    description: "당신에게 가장 잘 어울리는 스타일, AI가 찾아드립니다.",
+    images: ["/og-image.png"],
+  },
+  robots: {
+    index: true,
+    follow: true,
   },
 };
 

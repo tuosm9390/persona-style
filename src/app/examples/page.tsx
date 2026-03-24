@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { Header } from "@/components/layout/Header";
+import { Footer } from "@/components/layout/Footer";
 import { AnalysisResultDisplay } from "@/components/features/AnalysisResult";
 import { Button } from "@/components/ui/button";
 import { FormattedText } from "@/components/ui/formatted-text";
@@ -97,6 +98,7 @@ export default function ExamplesPage() {
           </Button>
         </div>
       </main>
+      <Footer />
     </div>
   );
 }

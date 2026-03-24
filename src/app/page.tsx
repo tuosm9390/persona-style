@@ -4,6 +4,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Header } from "@/components/layout/Header";
+import { Footer } from "@/components/layout/Footer";
 import { FormattedText } from "@/components/ui/formatted-text";
 import { ArrowRight, Sparkles, Upload } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -94,10 +95,6 @@ export default function Home() {
                   <feature.icon className="h-6 w-6" />
                 </div>
                 <h3 className="font-bold text-xl mb-2">{feature.title}</h3>
-                <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-secondary text-primary mb-4 group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
-                  <feature.icon className="h-6 w-6" />
-                </div>
-                <h3 className="font-bold text-xl mb-2">{feature.title}</h3>
                 <FormattedText
                   text={feature.description}
                   className="text-muted-foreground"
@@ -107,6 +104,7 @@ export default function Home() {
           </div>
         </section>
       </main>
+      <Footer />
     </div>
   );
 }

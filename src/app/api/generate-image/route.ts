@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getGeminiModel } from "@/lib/gemini";
+import { getGeminiModel, IMAGE_MODELS } from "@/lib/gemini";
 import type { AnalysisResult } from "@/lib/types";
 
 // Retry configuration
-const MAX_RETRIES = 3;
-const BASE_DELAY_MS = 2000; // 2 seconds
+const MAX_RETRIES = 2;
+const BASE_DELAY_MS = 3000; // 3 seconds
 
 async function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -25,26 +25,24 @@ async function withRetry<T>(
     } catch (error: any) {
       lastError = error;
 
-      const is429 =
+      const isRateLimit =
         error.message?.includes("429") ||
         error.message?.includes("Too Many Requests") ||
         error.message?.includes("quota");
 
-      // Only retry on rate limit errors
-      if (!is429 || attempt === maxRetries) {
+      const isServiceUnavailable = 
+        error.message?.includes("503") || 
+        error.message?.includes("Service Unavailable") ||
+        error.message?.includes("high demand");
+
+      // Only retry on rate limit (429) or temporary server issues (503)
+      if ((!isRateLimit && !isServiceUnavailable) || attempt === maxRetries) {
         throw error;
       }
 
-      // Parse retry delay from error if available, otherwise use exponential backoff
       let delayMs = BASE_DELAY_MS * Math.pow(2, attempt);
-
-      const retryMatch = error.message?.match(/retry\s+in\s+([\d.]+)s/i);
-      if (retryMatch) {
-        delayMs = Math.max(parseFloat(retryMatch[1]) * 1000, delayMs);
-      }
-
       console.log(
-        `Rate limited. Attempt ${attempt + 1}/${maxRetries}. Retrying in ${Math.round(delayMs / 1000)}s...`
+        `⚠️ ${isServiceUnavailable ? 'Server busy' : 'Rate limited'}. Attempt ${attempt + 1}/${maxRetries}. Waiting ${Math.round(delayMs / 1000)}s...`
       );
       await sleep(delayMs);
     }
@@ -65,67 +63,65 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Build image generation prompt from analysis result
     const prompt = buildStyleImagePrompt(result);
+    let lastError: any = null;
 
-    console.log("Generating style image with prompt:", prompt.substring(0, 200) + "...");
+    // Try each image-capable model in order
+    for (const modelName of IMAGE_MODELS) {
+      try {
+        console.log(`🎨 Generating image with model: ${modelName}`);
+        const model = getGeminiModel(modelName);
 
-    // Use Gemini 2.5 Flash Image model with retry logic
-    const model = getGeminiModel("gemini-3-pro-image-preview");
+        const imageResult = await withRetry(async () => {
+          return await model.generateContent(prompt);
+        });
 
-    const imageResult = await withRetry(async () => {
-      return await model.generateContent(prompt);
-    });
+        const response = imageResult.response;
+        const candidates = response.candidates;
 
-    const response = imageResult.response;
+        if (!candidates || candidates.length === 0) continue;
 
-    // Extract image data from response parts (official API format)
-    const candidates = response.candidates;
-    if (!candidates || candidates.length === 0) {
-      return NextResponse.json(
-        { error: "이미지 생성 결과가 없습니다." },
-        { status: 500 }
-      );
-    }
+        const parts = candidates[0].content?.parts;
+        if (!parts || parts.length === 0) continue;
 
-    const parts = candidates[0].content?.parts;
-    if (!parts || parts.length === 0) {
-      return NextResponse.json(
-        { error: "응답에 이미지 데이터가 포함되어 있지 않습니다." },
-        { status: 500 }
-      );
-    }
+        let imageBase64: string | null = null;
+        let imageMimeType: string | null = null;
+        let textResponse: string | null = null;
 
-    let imageBase64: string | null = null;
-    let imageMimeType: string | null = null;
-    let textResponse: string | null = null;
+        for (const part of parts) {
+          if (part.text) {
+            textResponse = part.text;
+          } else if (part.inlineData) {
+            imageBase64 = part.inlineData.data;
+            imageMimeType = part.inlineData.mimeType;
+          }
+        }
 
-    for (const part of parts) {
-      if (part.text) {
-        textResponse = part.text;
-      } else if (part.inlineData) {
-        imageBase64 = part.inlineData.data;
-        imageMimeType = part.inlineData.mimeType;
+        if (imageBase64) {
+          console.log(`✅ Success with image model: ${modelName}`);
+          return NextResponse.json({
+            success: true,
+            imageData: imageBase64,
+            mimeType: imageMimeType,
+            textResponse,
+            model: modelName,
+          });
+        }
+      } catch (err: any) {
+        lastError = err;
+        console.warn(`❌ Model ${modelName} failed: ${err.message?.substring(0, 100)}`);
+
+        // If billing/spending cap error, stop everything
+        if (err.message?.includes("spending cap") || err.message?.includes("billing")) {
+          break;
+        }
+        // Continue to next model for 503 or 429
       }
     }
 
-    if (!imageBase64) {
-      return NextResponse.json(
-        {
-          error: "이미지가 생성되지 않았습니다. 텍스트만 반환되었습니다.",
-          textResponse,
-        },
-        { status: 500 }
-      );
-    }
+    // If we get here, all models failed
+    throw lastError || new Error("모든 이미지 생성 모델 시도가 실패했습니다.");
 
-    return NextResponse.json({
-      success: true,
-      imageData: imageBase64,
-      mimeType: imageMimeType,
-      textResponse,
-      prompt,
-    });
   } catch (error: any) {
     console.error("Image generation error:", error);
 
