@@ -4,33 +4,15 @@ import * as React from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { Globe, User, LogOut, History } from "lucide-react";
-import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 
 export function Header() {
   const { t, language, changeLanguage } = useLanguage();
-  const [user, setUser] = React.useState<any>(null);
-
-  React.useEffect(() => {
-    if (isSupabaseConfigured()) {
-      // Get initial session
-      supabase!.auth.getSession().then(({ data: { session } }) => {
-        setUser(session?.user ?? null);
-      });
-
-      // Listen for auth changes
-      const {
-        data: { subscription },
-      } = supabase!.auth.onAuthStateChange((_event, session) => {
-        setUser(session?.user ?? null);
-      });
-
-      return () => subscription.unsubscribe();
-    }
-  }, []);
+  const { user, signOut } = useAuth();
 
   const handleLogout = async () => {
-    await supabase!.auth.signOut();
+    await signOut();
     window.location.href = "/";
   };
 

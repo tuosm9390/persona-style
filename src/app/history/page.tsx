@@ -16,19 +16,28 @@ import {
   type AnalysisHistoryItem,
 } from "@/lib/history";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useAuth } from "@/contexts/AuthContext";
+import { useRouter } from "next/navigation";
 
 export default function HistoryPage() {
   const { t } = useLanguage();
+  const { user, isLoading: authLoading } = useAuth();
+  const router = useRouter();
   const [history, setHistory] = React.useState<AnalysisHistoryItem[]>([]);
   const [selectedItem, setSelectedItem] = React.useState<AnalysisHistoryItem | null>(null);
+  const [isDataLoading, setIsDataLoading] = React.useState(true);
 
   React.useEffect(() => {
     const fetchHistory = async () => {
+      setIsDataLoading(true);
       const data = await getAnalysisHistory();
       setHistory(data);
+      setIsDataLoading(false);
     };
-    fetchHistory();
-  }, []);
+    if (!authLoading) {
+      fetchHistory();
+    }
+  }, [authLoading, user]);
 
   const handleDelete = async (id: string) => {
     if (confirm("이 분석 결과를 삭제하시겠습니까?")) {
@@ -109,6 +118,20 @@ export default function HistoryPage() {
     }
   }, [history]);
 
+  if (authLoading || isDataLoading) {
+    return (
+      <div className="flex min-h-screen flex-col bg-muted/30">
+        <Header />
+        <main className="container flex-1 flex items-center justify-center">
+          <div className="flex flex-col items-center gap-2">
+            <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+            <p className="text-muted-foreground">기록을 불러오는 중...</p>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
   if (selectedItem) {
     return (
       <div className="flex min-h-screen flex-col bg-muted/30">
@@ -128,6 +151,16 @@ export default function HistoryPage() {
     <div className="flex min-h-screen flex-col bg-muted/30">
       <Header />
       <main className="container flex-1 py-12 px-4 md:px-6">
+        {!user && (
+          <div className="mb-8 p-4 bg-primary/5 border border-primary/10 rounded-xl flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="text-sm text-muted-foreground text-center sm:text-left">
+              <span className="font-semibold text-primary">로그인</span>하시면 분석 결과를 클라우드에 영구적으로 보관하고 어디서든 확인할 수 있습니다.
+            </div>
+            <Button size="sm" onClick={() => router.push("/login")} className="rounded-full shrink-0">
+              지금 로그인하기
+            </Button>
+          </div>
+        )}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}

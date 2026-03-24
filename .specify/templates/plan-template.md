@@ -31,7 +31,11 @@
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-[Gates determined based on constitution file]
+- [ ] **한국어 준수**: 모든 문서 및 소통이 한국어로 작성되었는가?
+- [ ] **TDD 계획**: 테스트 케이스가 구현보다 먼저 정의되었는가?
+- [ ] **보안 검증**: API 경계 데이터 검증 및 Supabase RLS 정책이 고려되었는가?
+- [ ] **3-Strike 인지**: 에러 발생 시 무한 루프 방지 지침을 숙지하였는가?
+- [ ] **기술 스택 일치**: Next.js 16 + Supabase SSR 환경에 적합한 설계인가?
 
 ## Project Structure
 

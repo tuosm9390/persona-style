@@ -5,7 +5,8 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { supabase } from "@/lib/supabase";
+import { createClient } from "@/lib/supabase";
+import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
@@ -14,7 +15,16 @@ import { Sparkles, Mail, Github } from "lucide-react";
 export default function LoginPage() {
   const [email, setEmail] = React.useState("");
   const [isLoading, setIsLoading] = React.useState(false);
+  const { user } = useAuth();
   const router = useRouter();
+  const supabase = React.useMemo(() => createClient(), []);
+
+  // 이미 로그인되어 있으면 홈으로 리다이렉트
+  React.useEffect(() => {
+    if (user) {
+      router.push("/");
+    }
+  }, [user, router]);
 
   const handleMagicLinkLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -22,7 +32,7 @@ export default function LoginPage() {
 
     setIsLoading(true);
     try {
-      const { error } = await supabase!.auth.signInWithOtp({
+      const { error } = await supabase.auth.signInWithOtp({
         email,
         options: {
           emailRedirectTo: `${window.location.origin}/auth/callback`,
@@ -31,26 +41,29 @@ export default function LoginPage() {
 
       if (error) throw error;
       toast.success("로그인 링크가 이메일로 전송되었습니다. 이메일을 확인해주세요!");
-    } catch (error: any) {
-      toast.error(error.message || "로그인 시도 중 오류가 발생했습니다.");
-    } finally {
+      } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "로그인 시도 중 오류가 발생했습니다.";
+      toast.error(message);
+      } finally {
       setIsLoading(false);
-    }
-  };
+      }
+      };
 
-  const handleSocialLogin = async (provider: 'github' | 'google') => {
-    try {
-      const { error } = await supabase!.auth.signInWithOAuth({
+      const handleSocialLogin = async (provider: 'github' | 'google') => {
+      try {
+      const { error } = await supabase.auth.signInWithOAuth({
         provider,
         options: {
           redirectTo: `${window.location.origin}/auth/callback`,
         },
       });
       if (error) throw error;
-    } catch (error: any) {
-      toast.error(error.message || "소셜 로그인 중 오류가 발생했습니다.");
-    }
-  };
+      } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "소셜 로그인 중 오류가 발생했습니다.";
+      toast.error(message);
+      }
+      };
+
 
   return (
     <div className="flex min-h-screen flex-col bg-muted/30">

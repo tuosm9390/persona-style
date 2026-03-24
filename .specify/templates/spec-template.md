@@ -84,6 +84,8 @@
 
 ### Functional Requirements
 
+- **FR-SEC-001**: System MUST validate all user inputs at the API boundary using Zod or equivalent.
+- **FR-SEC-002**: Database access MUST strictly follow Supabase RLS policies.
 - **FR-001**: System MUST [specific capability, e.g., "allow users to create accounts"]
 - **FR-002**: System MUST [specific capability, e.g., "validate email addresses"]  
 - **FR-003**: Users MUST be able to [key interaction, e.g., "reset their password"]
