@@ -37,6 +37,7 @@ import { toPng } from "html-to-image";
 import { ShareCard } from "./ShareCard";
 import { toast } from "sonner";
 import { Download, Share2 } from "lucide-react";
+import router from "next/router";
 
 interface AnalysisResultDisplayProps {
   result: AnalysisResult;
@@ -387,7 +388,7 @@ export function AnalysisResultDisplay({
     }
 
     const shareUrl = `${window.location.origin}/analyze/${analysisId}`;
-    
+
     if (navigator.share) {
       try {
         await navigator.share({
@@ -409,7 +410,6 @@ export function AnalysisResultDisplay({
     <div className="mx-auto max-w-4xl space-y-8 pb-16">
       {/* Hidden share card for capture */}
       <ShareCard result={result} cardRef={cardRef} />
-
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: -10 }}
@@ -468,7 +468,6 @@ export function AnalysisResultDisplay({
           className="mx-auto max-w-[600px] text-muted-foreground text-left md:text-center"
         />
       </motion.div>
-
       {/* Analysis Card */}
       <motion.div
         custom={0}
@@ -526,7 +525,6 @@ export function AnalysisResultDisplay({
           </CardContent>
         </Card>
       </motion.div>
-
       {/* Fashion Card */}
       <motion.div
         custom={1}
@@ -622,7 +620,6 @@ export function AnalysisResultDisplay({
           </CardContent>
         </Card>
       </motion.div>
-
       {/* Beauty Card */}
       <motion.div
         custom={2}
@@ -678,7 +675,6 @@ export function AnalysisResultDisplay({
           </CardContent>
         </Card>
       </motion.div>
-
       {/* Moodboard Section */}
       <motion.div
         custom={3}
@@ -735,10 +731,8 @@ export function AnalysisResultDisplay({
           </CardContent>
         </Card>
       </motion.div>
-
       {/* AI Generated Style Image */}
       {/* <StyleImageSection result={result} /> */}
-
       {/* Action Items */}
       <motion.div
         custom={4}
@@ -765,7 +759,6 @@ export function AnalysisResultDisplay({
           </CardContent>
         </Card>
       </motion.div>
-
       {/* Shopping / Affiliate Suggestion (Monetization) */}
       <motion.div
         custom={5}
@@ -788,13 +781,27 @@ export function AnalysisResultDisplay({
           <CardContent className="pt-6">
             <div className="flex flex-col md:flex-row gap-6 items-center justify-between">
               <div className="space-y-2 flex-1 text-center md:text-left">
-                <h3 className="font-semibold text-lg">{result.summary.title}에 어울리는 아이템</h3>
+                <h3 className="font-semibold text-lg">
+                  {result.summary.title}에 어울리는 아이템
+                </h3>
                 <p className="text-sm text-muted-foreground">
-                  AI가 분석한 퍼스널 컬러 <b>{result.analysis.colorSeason}</b>와 <b>{result.analysis.bodyType}</b> 체형을 돋보이게 해줄 베스트 아이템들을 선별했습니다.
+                  AI가 분석한 퍼스널 컬러 <b>{result.analysis.colorSeason}</b>와{" "}
+                  <b>{result.analysis.bodyType}</b> 체형을 돋보이게 해줄 베스트
+                  아이템들을 선별했습니다.
                 </p>
               </div>
-              <Button size="lg" className="rounded-full shadow-md w-full md:w-auto shrink-0 group" asChild>
-                <a href="#shop-link" onClick={(e) => { e.preventDefault(); toast.success("향후 쇼핑몰 제휴 링크로 연결될 영역입니다."); }}>
+              <Button
+                size="lg"
+                className="rounded-full shadow-md w-full md:w-auto shrink-0 group"
+                asChild
+              >
+                <a
+                  href="#shop-link"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    toast.success("향후 쇼핑몰 제휴 링크로 연결될 영역입니다.");
+                  }}
+                >
                   맞춤 아이템 보기
                   <ChevronRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
                 </a>
@@ -803,7 +810,6 @@ export function AnalysisResultDisplay({
           </CardContent>
         </Card>
       </motion.div>
-
       {/* Save History Suggestion (Login Drive) */}
       <motion.div
         custom={5}
@@ -814,19 +820,25 @@ export function AnalysisResultDisplay({
         <Card className="border-accent/20 bg-accent/5 overflow-hidden relative">
           <div className="absolute top-0 right-0 w-32 h-32 bg-accent/10 rounded-full blur-2xl translate-x-16 -translate-y-16" />
           <CardHeader>
-            <CardTitle className="text-lg">분석 결과를 저장하고 싶으신가요?</CardTitle>
+            <CardTitle className="text-lg">
+              분석 결과를 저장하고 싶으신가요?
+            </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <p className="text-sm text-muted-foreground">
-              로그인하시면 지금까지의 모든 스타일 분석 기록을 언제 어디서나 다시 확인하실 수 있습니다. 나만의 스타일 변천사를 기록해보세요.
+              로그인하시면 지금까지의 모든 스타일 분석 기록을 언제 어디서나 다시
+              확인하실 수 있습니다. 나만의 스타일 변천사를 기록해보세요.
             </p>
-            <Button variant="outline" className="w-full md:w-auto rounded-full border-accent/30 hover:bg-accent hover:text-accent-foreground" asChild>
+            <Button
+              variant="outline"
+              className="w-full md:w-auto rounded-full border-accent/30 hover:bg-accent hover:text-accent-foreground"
+              asChild
+            >
               <a href="/login">무료로 시작하고 결과 저장하기</a>
             </Button>
           </CardContent>
         </Card>
       </motion.div>
-
       {/* Reset Button */}
       <motion.div
         custom={4}
@@ -848,12 +860,15 @@ export function AnalysisResultDisplay({
         <Button
           variant="default"
           size="lg"
-          onClick={() => router.push(`/checkout?analysis_id=${(result as any).id}`)}
+          onClick={() =>
+            router.push(`/checkout?analysis_id=${(result as any).id}`)
+          }
           className="rounded-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 border-none shadow-lg group"
         >
           <Sparkles className="mr-2 h-4 w-4 text-yellow-300 group-hover:animate-pulse" />
           전문가 심층 리포트 보기
         </Button>
-        </motion.div>    </div>
+      </motion.div>{" "}
+    </div>
   );
 }
