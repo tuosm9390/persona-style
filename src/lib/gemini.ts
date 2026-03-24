@@ -19,25 +19,25 @@ const FALLBACK_MODELS = [
 
 // Models capable of image generation (experimental/preview)
 const IMAGE_MODELS = [
-  "gemini-2.0-flash-exp",
-  "gemini-2.0-pro-exp-02-05",
+  "gemini-2.5-flash-image",
   "gemini-3-pro-image-preview",
+  "gemini-3.1-flash-image-preview",
 ];
 
-export function getGeminiModel(modelName: string = "gemini-2.0-flash") {
+export function getGeminiModel(modelName: string = "gemini-2.5-flash-image") {
   return genAI.getGenerativeModel({ model: modelName });
 }
 
 export async function generateMatchingSummary(
   sourceType?: string,
   targetType?: string,
-  score: number = 0
+  score: number = 0,
 ): Promise<string> {
   const model = getGeminiModel();
   const prompt = `
     Two people have the following persona styles:
-    Person A: ${sourceType || 'Unknown'}
-    Person B: ${targetType || 'Unknown'}
+    Person A: ${sourceType || "Unknown"}
+    Person B: ${targetType || "Unknown"}
     
     Their compatibility score is ${score}/100.
     

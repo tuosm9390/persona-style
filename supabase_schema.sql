@@ -87,16 +87,17 @@ CREATE TABLE persona_stats (
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
--- 9. 통계 갱신 RPC
+-- 9. 통계 갱신 RPC (익명화 처리 강화)
 CREATE OR REPLACE FUNCTION refresh_persona_stats()
 RETURNS VOID AS $$
 DECLARE
   total_count INT;
 BEGIN
+  -- 공개 설정된 데이터만 대상으로 하며, 식별자(user_id)는 전혀 참조하지 않음
   SELECT COUNT(*) INTO total_count FROM analysis_history WHERE is_public = TRUE;
   
   IF total_count > 0 THEN
-    -- 기존 데이터 삭제 후 재집계
+    -- 기존 데이터 삭제 후 통계적 결과만 재삽입 (Aggregation Only)
     TRUNCATE persona_stats;
     
     INSERT INTO persona_stats (persona_type, count, ratio, updated_at)
@@ -105,9 +106,50 @@ BEGIN
       COUNT(*), 
       (COUNT(*)::FLOAT / total_count * 100),
       now()
-    FROM analysis_history
-    WHERE is_public = TRUE AND persona_type IS NOT NULL
-    GROUP BY persona_type;
-  END IF;
-END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+-- 10. 프리미엄 리포트 테이블 생성
+CREATE TABLE premium_reports (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  analysis_id UUID REFERENCES analysis_history(id) ON DELETE CASCADE,
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+  deep_analysis_json JSONB NOT NULL,
+  pdf_url TEXT,
+  payment_id UUID, -- payment_transactions와 연결 (추후 FK 추가 가능)
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+-- 11. 결제 트랜잭션 테이블 생성
+CREATE TYPE payment_status AS ENUM ('ready', 'paid', 'cancelled', 'failed');
+
+CREATE TABLE payment_transactions (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+  imp_uid TEXT,
+  merchant_uid TEXT UNIQUE NOT NULL,
+  amount INT NOT NULL,
+  status payment_status DEFAULT 'ready',
+  paid_at TIMESTAMP WITH TIME ZONE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+-- 12. RLS 활성화
+ALTER TABLE premium_reports ENABLE ROW LEVEL SECURITY;
+ALTER TABLE payment_transactions ENABLE ROW LEVEL SECURITY;
+
+-- 13. RLS 정책 (원칙 VII 준수)
+-- 결제 완료된 건에 대해서만 소유자가 접근 가능
+CREATE POLICY "Users can view their own paid premium reports" 
+ON premium_reports FOR SELECT 
+USING (
+  auth.uid() = user_id AND EXISTS (
+    SELECT 1 FROM payment_transactions 
+    WHERE id = premium_reports.payment_id AND status = 'paid'
+  )
+);
+
+CREATE POLICY "Users can view their own transactions" 
+ON payment_transactions FOR SELECT 
+USING (auth.uid() = user_id);
+
+-- 14. Storage Bucket 설정 안내 (SQL로 직접 생성이 제한될 수 있으므로 주석으로 기록)
+-- insert into storage.buckets (id, name, public) values ('premium_pdfs', 'premium_pdfs', false);
+-- CREATE POLICY "Premium PDF Access" ON storage.objects FOR SELECT USING (bucket_id = 'premium_pdfs' AND auth.uid() = owner);

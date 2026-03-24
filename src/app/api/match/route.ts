@@ -24,7 +24,18 @@ export async function POST(req: NextRequest) {
   const { source_id, target_id } = validation.data;
 
   try {
-    // 3. 매칭 계산
+    // 3. 소유권 검증 (원칙 VII: Privacy-First)
+    const { data: sourceData } = await supabase
+      .from('analysis_history')
+      .select('user_id')
+      .eq('id', source_id)
+      .single();
+
+    if (!sourceData || sourceData.user_id !== session.user.id) {
+      return NextResponse.json({ error: '본인의 분석 결과만 소스로 사용할 수 있습니다.' }, { status: 403 });
+    }
+
+    // 4. 매칭 계산
     const matchResult = await calculatePersonaMatch(supabase, source_id, target_id);
     return NextResponse.json(matchResult);
   } catch (error: any) {

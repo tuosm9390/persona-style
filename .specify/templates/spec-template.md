@@ -88,6 +88,8 @@
 - **FR-SEC-002**: Database access MUST strictly follow Supabase RLS policies to ensure data isolation.
 - **FR-SEC-003**: All shared or aggregated trend data MUST be anonymized before exposure.
 - **FR-VIS-001**: Visual artifacts MUST be generated within 3 seconds and maintain high-resolution quality.
+- **FR-RET-001**: System MUST provide a chronological view of user persona evolution over time.
+- **FR-COM-001**: Community shared data MUST be strictly anonymized and pass safety guidelines.
 - **FR-001**: System MUST [specific capability, e.g., "allow users to create accounts"]
 - **FR-002**: System MUST [specific capability, e.g., "validate email addresses"]  
 - **FR-003**: Users MUST be able to [key interaction, e.g., "reset their password"]

@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { Toaster } from "@/components/ui/sonner";
+import Script from "next/script";
 
 const inter = Inter({
   variable: "--font-sans",
@@ -72,6 +73,7 @@ export default function RootLayout({
             <Toaster />
           </LanguageProvider>
         </AuthProvider>
+        <Script src="https://cdn.iamport.kr/v1/iamport.js" />
       </body>
     </html>
   );

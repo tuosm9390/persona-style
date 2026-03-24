@@ -844,7 +844,16 @@ export function AnalysisResultDisplay({
           <ArrowLeft className="mr-2 h-4 w-4" />
           {actualResetLabel}
         </Button>
-      </motion.div>
-    </div>
+
+        <Button
+          variant="default"
+          size="lg"
+          onClick={() => router.push(`/checkout?analysis_id=${(result as any).id}`)}
+          className="rounded-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 border-none shadow-lg group"
+        >
+          <Sparkles className="mr-2 h-4 w-4 text-yellow-300 group-hover:animate-pulse" />
+          전문가 심층 리포트 보기
+        </Button>
+        </motion.div>    </div>
   );
 }
