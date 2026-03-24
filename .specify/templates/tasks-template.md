@@ -153,7 +153,8 @@ Examples of foundational tasks (adjust based on your project):
 - [ ] TXXX [P] Documentation updates in docs/
 - [ ] TXXX Code cleanup and refactoring
 - [ ] TXXX [P] Validate visual artifact resolution and generation performance (within 3s)
-- [ ] TXXX [P] Verify Supabase RLS policies and data anonymization for trend aggregation
+- [ ] TXXX [P] Verify Supabase RLS policies and data anonymization for trend/community features
+- [ ] TXXX [P] Validate user retention logic (evolution tracking, history consistency)
 - [ ] TXXX Performance optimization across all stories
 - [ ] TXXX [P] Additional unit tests (if requested) in tests/unit/
 - [ ] TXXX Security hardening

@@ -1,12 +1,12 @@
 <!--
-Version change: 1.0.0 → 1.1.0
+Version change: 1.1.0 → 1.2.0
 Modified principles: 
-  - VI. 시각적 경험 최적화 (Visual Experience Excellence) 추가
-  - VII. 개인정보 및 민감 데이터 보호 (Privacy-First Data Handling) 추가
-Added sections: 시각적 명세 (Visual Specification), 데이터 보호 (Data Protection)
+  - VIII. 사용자 경험 지속성 및 리텐션 (User Retention & Continuity) 추가
+  - IX. 커뮤니티 신뢰 및 소셜 상호작용 (Community Trust & Social Interaction) 추가
+Added sections: 리텐션 설계 (Retention Design), 커뮤니티 가이드라인 (Community Guidelines)
 Templates updated: ✅ .specify/memory/constitution.md, ✅ .specify/templates/plan-template.md, ✅ .specify/templates/spec-template.md, ✅ .specify/templates/tasks-template.md
 Follow-up TODOs: 
-  - TODO(IMPLEMENT_SYNC): 향후 구현 시 새로운 원칙 준수 여부 확인
+  - TODO(ENGAGEMENT_SYNC): 향후 커뮤니티 기능 구현 시 익명화 원칙 준수 확인
 -->
 
 # PersonaStyle Constitution
@@ -41,6 +41,14 @@ Follow-up TODOs:
 사용자의 텍스트 및 이미지 분석 데이터는 반드시 소유자 본인만 접근 가능하도록 RLS로 격리해야 하며, 트렌드 집계 시에는 반드시 익명화 처리해야 합니다.
 - **Rationale**: 사용자의 프라이버시를 최우선으로 보호하고 데이터 유출 리스크를 관리하기 위함입니다.
 
+### VIII. 사용자 경험 지속성 및 리텐션 (User Retention & Continuity)
+단순 분석을 넘어 사용자의 분석 히스토리를 시계열적으로 추적하고, 변화에 따른 맞춤형 성장 인사이트를 제공하여 지속적인 가치를 창출해야 합니다.
+- **Rationale**: 서비스의 라이프사이클을 연장하고 사용자와의 장기적인 신뢰 관계를 구축하기 위함입니다.
+
+### IX. 커뮤니티 신뢰 및 소셜 상호작용 (Community Trust & Social Interaction)
+커뮤니티 피드와 공유 기능은 철저히 익명성을 기반으로 운영되어야 하며, 타인에게 영감을 주는 긍정적인 상호작용만을 장려하는 안전 장치를 포함해야 합니다.
+- **Rationale**: 심리 및 스타일 데이터의 민감성을 고려하여 안전한 소통 환경을 조성하고 네트워크 효과를 극대화하기 위함입니다.
+
 ## 기술 스택 정렬 (Tech Stack Alignment)
 본 프로젝트는 **Next.js 16**, **Supabase (SSR)**, **Tailwind CSS**, **TypeScript**를 기반으로 합니다.
 - 모든 기능은 서버 사이드 인증과 클라이언트 사이드 상태 관리의 조화를 최우선으로 고려하여 설계되어야 합니다.
@@ -52,11 +60,12 @@ Follow-up TODOs:
 2. `npm run lint` 실행 시 에러 없음.
 3. 시크릿(API Key 등)의 하드코딩 여부 전수 조사.
 4. 시각적 결과물의 해상도 및 로딩 성능 검증.
-5. 사용자 시나리오 기반의 최종 검증 보고서 작성.
+5. 커뮤니티 공유 시 데이터 익명화 여부 전수 검증.
+6. 사용자 시나리오 기반의 최종 검증 보고서 작성.
 
 ## Governance
 헌장은 프로젝트의 모든 개발 관행에 우선하며, 모든 작업 계획은 헌장 준수 여부를 포함해야 합니다.
 - 헌장 수정은 문서화된 제안과 승인 절차를 거쳐야 하며, 수정 시 버전 번호를 갱신합니다.
 - `CONSTITUTION_VERSION`은 유의적 버전(MAJOR.MINOR.PATCH) 규칙을 따릅니다.
 
-**Version**: 1.1.0 | **Ratified**: 2026-03-24 | **Last Amended**: 2026-03-24
+**Version**: 1.2.0 | **Ratified**: 2026-03-24 | **Last Amended**: 2026-03-25

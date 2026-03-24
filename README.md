@@ -35,3 +35,4 @@ The easiest way to deploy your Next.js app is to use the [Vercel Platform](https
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
 `n## Viral Engine API`n`n- **Share Card**: `GET /api/share/[id]` - 고퀄리티 9:16 카드 이미지 생성`n- **Matching**: `POST /api/match` - 두 페르소나 간의 궁합 분석`n- **Trend**: `GET /api/trend` - 전체 페르소나 분포 실시간 집계
+`n## Premium Features`n`n- **Deep Analysis**: Gemini 1.5 Pro를 활용한 전문가 수준의 심리 및 스타일 분석.`n- **Expert Report**: 고해상도 A4 PDF 리포트 생성 및 다운로드.`n- **Payment**: Portone 통합 결제 시스템 (신용카드, 카카오페이 등).`n`n### Premium API`n- `POST /api/premium/analyze` - 심층 분석 시작.`n- `GET /api/premium/pdf/[id]` - PDF 리포트 다운로드.`n- `POST /api/payment/verify` - 결제 상태 검증.

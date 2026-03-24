@@ -6,6 +6,9 @@ import { Resvg } from '@resvg/resvg-js';
 import ShareCard from '@/components/features/ShareCard';
 import { PERSONA_DESIGN_TOKENS } from '@/types/viral';
 
+// 폰트 캐싱용 변수
+let fontCache: ArrayBuffer | null = null;
+
 export async function GET(
   req: NextRequest,
   { params }: { params: { id: string } }
@@ -13,28 +16,15 @@ export async function GET(
   const supabase = createRouteHandlerClient({ cookies });
   const { id } = params;
 
-  // 1. 데이터 조회
-  const { data: history, error } = await supabase
-    .from('analysis_history')
-    .select('*')
-    .eq('id', id)
-    .single();
-
-  if (error || !history) {
-    return new NextResponse('Analysis not found', { status: 404 });
-  }
-
-  // 2. 디자인 설정 구성
-  const personaType = history.persona_type || '기본';
-  const designConfig = history.design_config?.bg_color 
-    ? history.design_config 
-    : (PERSONA_DESIGN_TOKENS[personaType] || PERSONA_DESIGN_TOKENS['기본']);
+  // ... (생략)
 
   // 3. SVG 생성 (Satori)
-  // 폰트 로드 (실제 프로덕션에서는 서버 파일 시스템에서 로드 권장)
-  const fontData = await fetch(
-    new URL('https://github.com/google/fonts/raw/main/ofl/notosanskr/NotoSansKR%5Bwght%5D.ttf')
-  ).then((res) => res.arrayBuffer());
+  // 폰트 캐싱 로직 적용
+  if (!fontCache) {
+    fontCache = await fetch(
+      new URL('https://github.com/google/fonts/raw/main/ofl/notosanskr/NotoSansKR%5Bwght%5D.ttf')
+    ).then((res) => res.arrayBuffer());
+  }
 
   const svg = await satori(
     <ShareCard 
@@ -50,7 +40,7 @@ export async function GET(
       fonts: [
         {
           name: 'Noto Sans KR',
-          data: fontData,
+          data: fontCache!,
           weight: 400,
           style: 'normal',
         },
