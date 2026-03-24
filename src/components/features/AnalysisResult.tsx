@@ -359,60 +359,49 @@ export function AnalysisResultDisplay({
   const [isDownloading, setIsDownloading] = React.useState(false);
 
   const handleDownload = async () => {
-    if (!cardRef.current) return;
+    const analysisId = (result as any).id;
+    if (!analysisId) {
+      toast.error("저장된 분석 결과가 아닙니다. 먼저 결과를 저장해 주세요.");
+      return;
+    }
 
     setIsDownloading(true);
-    const toastId = toast.loading(
-      t("common.processing") || "이미지를 생성 중입니다...",
-    );
-
     try {
-      // Ensure fonts and images are loaded by giving it a tiny delay
-      await new Promise((resolve) => setTimeout(resolve, 500));
-
-      const dataUrl = await toPng(cardRef.current, {
-        quality: 0.95,
-        cacheBust: true,
-      });
-
       const link = document.createElement("a");
-      link.download = `persona-style-${result.summary.title.replace(/\s+/g, "-").toLowerCase()}.png`;
-      link.href = dataUrl;
+      link.href = `/api/share/${analysisId}`;
+      link.download = `persona-style-${analysisId}.png`;
       link.click();
-
-      toast.success(t("common.success") || "이미지가 다운로드되었습니다!", {
-        id: toastId,
-      });
+      toast.success("이미지 다운로드를 시작합니다.");
     } catch (err) {
-      console.error("Download error:", err);
-      toast.error(t("common.error") || "이미지 생성 중 오류가 발생했습니다.", {
-        id: toastId,
-      });
+      toast.error("이미지 생성 중 오류가 발생했습니다.");
     } finally {
       setIsDownloading(false);
     }
   };
 
   const handleShare = async () => {
-    if (!cardRef.current) return;
+    const analysisId = (result as any).id;
+    if (!analysisId) {
+      toast.error("저장된 분석 결과가 아닙니다.");
+      return;
+    }
 
-    try {
-      const dataUrl = await toPng(cardRef.current, { quality: 0.95 });
-      const blob = await fetch(dataUrl).then((r) => r.blob());
-      const file = new File([blob], "my-style-persona.png", { type: "image/png" });
-
-      if (navigator.share) {
+    const shareUrl = `${window.location.origin}/analyze/${analysisId}`;
+    
+    if (navigator.share) {
+      try {
         await navigator.share({
-          title: "My Style Persona",
-          text: `AI가 분석한 나의 스타일 페르소나는 '${result.summary.title}'입니다!`,
-          files: [file],
+          title: "My Persona Style",
+          text: `나의 스타일 페르소나는 '${result.summary.title}'입니다!`,
+          url: shareUrl,
         });
-      } else {
-        await handleDownload();
+      } catch (err) {
+        console.error("Share error:", err);
       }
-    } catch (err) {
-      console.error("Share error:", err);
-      toast.error("공유 중 오류가 발생했습니다.");
+    } else {
+      // 복사 기능으로 대체
+      await navigator.clipboard.writeText(shareUrl);
+      toast.success("공유 링크가 클립보드에 복사되었습니다!");
     }
   };
 
