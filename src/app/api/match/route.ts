@@ -37,8 +37,9 @@ export async function POST(req: NextRequest) {
     // 4. 매칭 계산
     const matchResult = await calculatePersonaMatch(supabase, source_id, target_id);
     return NextResponse.json(matchResult);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Matching API error:', error);
-    return NextResponse.json({ error: error.message || 'Matching failed' }, { status: 500 });
+    const message = error instanceof Error ? error.message : 'Matching failed';
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

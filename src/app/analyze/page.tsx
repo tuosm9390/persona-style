@@ -19,7 +19,6 @@ type AnalysisMode = "photo" | "text";
 export default function AnalyzePage() {
   const { t, language } = useLanguage();
   const [mode, setMode] = React.useState<AnalysisMode>("photo");
-  const [image, setImage] = React.useState<File | null>(null);
   const [imageBase64, setImageBase64] = React.useState<string>("");
   const [text, setText] = React.useState("");
   const [isAnalyzing, setIsAnalyzing] = React.useState(false);
@@ -27,7 +26,6 @@ export default function AnalyzePage() {
   const [result, setResult] = React.useState<AnalysisResult | null>(null);
 
   const handleImageSelect = async (file: File | null) => {
-    setImage(file);
     if (file) {
       try {
         // Compress image before setting it to base64
@@ -84,15 +82,18 @@ export default function AnalyzePage() {
       // Simulate finishing step
       await new Promise((resolve) => setTimeout(resolve, 800));
 
-      setResult(data.result);
-
-      // Save to history
+      // Save to history and get the final ID (Supabase UUID or local ID)
       const inputType =
         imageBase64 && text ? "combined" : imageBase64 ? "photo" : "text";
+
+      let finalResult = { ...data.result };
       if (typeof window !== "undefined") {
         const { saveAnalysisToHistory } = await import("@/lib/history");
-        saveAnalysisToHistory(data.result, inputType);
+        const savedId = await saveAnalysisToHistory(data.result, inputType);
+        finalResult.id = savedId;
       }
+
+      setResult(finalResult);
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : t("common.error");
       toast.error(message);
@@ -104,7 +105,7 @@ export default function AnalyzePage() {
 
   const handleReset = () => {
     setResult(null);
-    setImage(null);
+    // setImage(null);
     setImageBase64("");
     setText("");
   };
@@ -189,7 +190,7 @@ export default function AnalyzePage() {
                         <Camera className="h-5 w-5" />
                       </div>
                       <h2 className="font-display text-2xl font-bold">
-                        {t("analyze.tabs.photo")}
+                        {t("analyze.photoInput.label")}
                       </h2>
                     </div>
                     <UploadForm onImageSelect={handleImageSelect} />
@@ -201,16 +202,14 @@ export default function AnalyzePage() {
                         <PenLine className="h-5 w-5" />
                       </div>
                       <h2 className="font-display text-2xl font-bold">
-                        {t("analyze.tabs.text")}
+                        {t("analyze.textInput.label")}
                       </h2>
                     </div>
-                    <p className="text-sm text-muted-foreground font-light">
-                      {t("analyze.textInput.label")}
-                    </p>
                     <TextInput
                       onTextChange={setText}
                       value={text}
                       className="flex-1 min-h-[200px]"
+                      placeholder={t("analyze.textInput.placeholder")}
                     />
                   </div>
                 </>
@@ -221,16 +220,14 @@ export default function AnalyzePage() {
                       <PenLine className="h-5 w-5" />
                     </div>
                     <h2 className="font-display text-2xl font-bold">
-                      {t("analyze.tabs.text")}
+                      {t("analyze.textInput.label")}
                     </h2>
                   </div>
-                  <p className="text-sm text-muted-foreground font-light">
-                    {t("analyze.textInput.label")}
-                  </p>
                   <TextInput
                     onTextChange={setText}
                     value={text}
                     className="min-h-[300px]"
+                    placeholder={t("analyze.textInput.placeholder")}
                   />
                 </div>
               )}

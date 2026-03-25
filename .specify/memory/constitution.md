@@ -1,11 +1,15 @@
 <!--
-Version change: 1.3.0 → 1.4.0
+Sync Impact Report
+Date: 2026-03-25 14:15:00
+Author: Antigravity
+Version change: 1.4.0 → 1.4.1
 Modified principles: 
-  - XI. 프롬프트 엔지니어링 및 AI 응답 품질 (Prompt Engineering & AI Response Quality) 추가
-Added sections: AI 서비스 무결성 (AI Service Integrity)
-Templates updated: ✅ .specify/memory/constitution.md, ✅ .specify/templates/plan-template.md, ✅ .specify/templates/spec-template.md, ✅ .specify/templates/tasks-template.md
+  - X. 프리미엄 서비스 및 결제 무결성: 결제 수단(Portone) 및 PDF 생성 방식(react-pdf/renderer) 구체화
+Added sections: 기술 스택 정렬 (Tech Stack Alignment) 세부 내용 업데이트
+Templates updated: ✅ .specify/memory/constitution.md
 Follow-up TODOs: 
-  - TODO(PROMPT_VERSIONING): 프롬프트 변경 이력을 추적할 수 있는 별도의 관리 체계(GitHub Release 등) 검토
+  - ✅ .specify/templates/plan-template.md 내 기술 스택 동기화 완료
+  - ✅ .specify/templates/spec-template.md 내 요구사항 번호 체계 동기화 완료
 -->
 
 # PersonaStyle Constitution
@@ -49,7 +53,7 @@ Follow-up TODOs:
 - **Rationale**: 심리 및 스타일 데이터의 민감성을 고려하여 안전한 소통 환경을 조성하고 네트워크 효과를 극대화하기 위함입니다.
 
 ### X. 프리미엄 서비스 및 결제 무결성 (Premium Service & Payment Integrity)
-유료 결제 사용자의 기대를 충족하기 위해 전문가 수준의 PDF 리포트 품질을 보장해야 하며, 결제 프로세스(Portone 등)는 실시간 검증과 철저한 트랜잭션 관리를 통해 무결성을 유지해야 합니다.
+유료 결제 사용자의 기대를 충족하기 위해 전문가 수준의 PDF 리포트 품질을 보장해야 합니다. 리포트는 **react-pdf/renderer**를 우선적으로 사용하여 생성하며, 결제 프로세스는 **Portone**을 통해 실시간 검증과 철저한 트랜잭션 관리를 수행해야 합니다.
 - **Rationale**: 유료 사용자와의 신뢰를 유지하고 재정적/기술적 리스크를 최소화하기 위함입니다.
 
 ### XI. 프롬프트 엔지니어링 및 AI 응답 품질 (Prompt Engineering & AI Response Quality)
@@ -57,16 +61,16 @@ AI 엔진(Gemini 1.5 Pro 등)의 프롬프트는 버전 관리되어야 하며, 
 - **Rationale**: 모델 업데이트나 프롬프트 변경에도 일관된 분석 결과와 서비스 품질을 보장하기 위함입니다.
 
 ## 기술 스택 정렬 (Tech Stack Alignment)
-본 프로젝트는 **Next.js 16**, **Supabase (SSR)**, **Tailwind CSS**, **TypeScript**, **Portone (결제)**, **Gemini 1.5 Pro (AI)**를 기반으로 합니다.
+본 프로젝트는 **Next.js 16**, **Supabase (SSR)**, **Tailwind CSS**, **TypeScript 5.x**, **Portone (결제)**, **Gemini 1.5 Pro (AI)**, **react-pdf/renderer (PDF)**를 기반으로 합니다.
 - 모든 기능은 서버 사이드 인증과 클라이언트 사이드 상태 관리의 조화를 최우선으로 고려하여 설계되어야 합니다.
 - 새로운 라이브러리 도입 시 반드시 기존 스택과의 호환성을 먼저 검증해야 합니다.
 
 ## 품질 게이트 (Quality Gates)
 구현 완료 전 반드시 다음 단계를 통과해야 합니다.
-1. 모든 단위 및 통합 테스트 통과.
+1. 모든 단위 및 통합 테스트 통과 (Vitest 기반).
 2. `npm run lint` 실행 시 에러 없음.
 3. 시크릿(API Key 등)의 하드코딩 여부 전수 조사.
-4. 시각적 결과물의 해상도 및 로딩 성능 검증.
+4. 시각적 결과물의 해상도 및 로딩 성능 검증 (3초 이내).
 5. 커뮤니티 공유 시 데이터 익명화 여부 전수 검증.
 6. 결제 트랜잭션 무결성 및 PDF 리포트 가독성 검증.
 7. AI 응답 스키마 준수 및 프롬프트 버전 확인.
@@ -77,4 +81,4 @@ AI 엔진(Gemini 1.5 Pro 등)의 프롬프트는 버전 관리되어야 하며, 
 - 헌장 수정은 문서화된 제안과 승인 절차를 거쳐야 하며, 수정 시 버전 번호를 갱신합니다.
 - `CONSTITUTION_VERSION`은 유의적 버전(MAJOR.MINOR.PATCH) 규칙을 따릅니다.
 
-**Version**: 1.4.0 | **Ratified**: 2026-03-24 | **Last Amended**: 2026-03-25
+**Version**: 1.4.1 | **Ratified**: 2026-03-24 | **Last Amended**: 2026-03-25

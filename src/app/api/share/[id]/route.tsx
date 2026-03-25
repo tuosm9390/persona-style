@@ -71,13 +71,13 @@ export async function GET(
       .update({ share_count: (history.share_count || 0) + 1 })
       .eq('id', id);
 
-    return new NextResponse(pngBuffer as any, {
+    return new NextResponse(pngBuffer, {
       headers: {
         'Content-Type': 'image/png',
         'Cache-Control': 'public, max-age=31536000, immutable',
       },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Share image API error:', error);
     return new NextResponse('Internal Server Error', { status: 500 });
   }

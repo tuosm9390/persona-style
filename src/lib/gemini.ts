@@ -17,6 +17,9 @@ const FALLBACK_MODELS = [
   "gemini-2.5-flash",
 ];
 
+// High-performance model for premium analysis
+const PREMIUM_MODEL = "gemini-2.5-pro";
+
 // Models capable of image generation (experimental/preview)
 const IMAGE_MODELS = [
   "gemini-2.5-flash-image",
@@ -67,4 +70,4 @@ export async function generateMatchingSummary(
   }
 }
 
-export { FALLBACK_MODELS, IMAGE_MODELS };
+export { FALLBACK_MODELS, IMAGE_MODELS, PREMIUM_MODEL };

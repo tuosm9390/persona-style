@@ -17,10 +17,11 @@ export async function GET(req: NextRequest) {
       last_updated: stats[0]?.updated_at || new Date().toISOString(),
       distributions: stats,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Trend API error:", error);
+    const message = error instanceof Error ? error.message : "Failed to fetch trends";
     return NextResponse.json(
-      { error: "Failed to fetch trends" },
+      { error: message },
       { status: 500 },
     );
   }

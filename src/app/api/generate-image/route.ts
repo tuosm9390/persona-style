@@ -17,23 +17,24 @@ async function withRetry<T>(
   fn: () => Promise<T>,
   maxRetries: number = MAX_RETRIES
 ): Promise<T> {
-  let lastError: any;
+  let lastError: unknown;
 
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     try {
       return await fn();
-    } catch (error: any) {
+    } catch (error: unknown) {
       lastError = error;
+      const err = error as Error;
 
       const isRateLimit =
-        error.message?.includes("429") ||
-        error.message?.includes("Too Many Requests") ||
-        error.message?.includes("quota");
+        err.message?.includes("429") ||
+        err.message?.includes("Too Many Requests") ||
+        err.message?.includes("quota");
 
       const isServiceUnavailable = 
-        error.message?.includes("503") || 
-        error.message?.includes("Service Unavailable") ||
-        error.message?.includes("high demand");
+        err.message?.includes("503") || 
+        err.message?.includes("Service Unavailable") ||
+        err.message?.includes("high demand");
 
       // Only retry on rate limit (429) or temporary server issues (503)
       if ((!isRateLimit && !isServiceUnavailable) || attempt === maxRetries) {
@@ -64,7 +65,7 @@ export async function POST(request: NextRequest) {
     }
 
     const prompt = buildStyleImagePrompt(result);
-    let lastError: any = null;
+    let lastError: unknown = null;
 
     // Try each image-capable model in order
     for (const modelName of IMAGE_MODELS) {
@@ -107,12 +108,13 @@ export async function POST(request: NextRequest) {
             model: modelName,
           });
         }
-      } catch (err: any) {
+      } catch (err: unknown) {
         lastError = err;
-        console.warn(`❌ Model ${modelName} failed: ${err.message?.substring(0, 100)}`);
+        const error = err as Error;
+        console.warn(`❌ Model ${modelName} failed: ${error.message?.substring(0, 100)}`);
 
         // If billing/spending cap error, stop everything
-        if (err.message?.includes("spending cap") || err.message?.includes("billing")) {
+        if (error.message?.includes("spending cap") || error.message?.includes("billing")) {
           break;
         }
         // Continue to next model for 503 or 429
@@ -122,19 +124,21 @@ export async function POST(request: NextRequest) {
     // If we get here, all models failed
     throw lastError || new Error("모든 이미지 생성 모델 시도가 실패했습니다.");
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Image generation error:", error);
+    const err = error as any; // Safe cast for property access after checking
 
-    const statusCode = error.status || 500;
+    const statusCode = err.status || 500;
+    const message = err.message || "";
 
     // Detailed error classification
     if (
-      error.message?.includes("429") ||
-      error.message?.includes("quota") ||
-      error.message?.includes("Too Many Requests")
+      message.includes("429") ||
+      message.includes("quota") ||
+      message.includes("Too Many Requests")
     ) {
       // Check if it's a daily quota (unrecoverable by retry)
-      const isDailyQuota = error.message?.includes("PerDay");
+      const isDailyQuota = message.includes("PerDay");
 
       return NextResponse.json(
         {
@@ -148,7 +152,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (error.message?.includes("API key")) {
+    if (message.includes("API key")) {
       return NextResponse.json(
         {
           error: "API 키가 설정되지 않았습니다. .env.local에 GEMINI_API_KEY를 설정해주세요.",
@@ -158,7 +162,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (error.message?.includes("safety") || error.message?.includes("SAFETY")) {
+    if (message.includes("safety") || message.includes("SAFETY")) {
       return NextResponse.json(
         {
           error: "안전 필터에 의해 이미지 생성이 차단되었습니다. 다른 스타일로 시도해주세요.",
@@ -172,7 +176,7 @@ export async function POST(request: NextRequest) {
       {
         error: "이미지 생성 중 오류가 발생했습니다.",
         code: "UNKNOWN_ERROR",
-        details: error.message?.substring(0, 200),
+        details: message.substring(0, 200),
       },
       { status: statusCode }
     );

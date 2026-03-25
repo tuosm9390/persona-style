@@ -17,15 +17,15 @@
   the iteration process.
 -->
 
-**Language/Version**: [e.g., Python 3.11, Swift 5.9, Rust 1.75 or NEEDS CLARIFICATION]  
-**Primary Dependencies**: [e.g., FastAPI, UIKit, LLVM or NEEDS CLARIFICATION]  
-**Storage**: [if applicable, e.g., PostgreSQL, CoreData, files or N/A]  
-**Testing**: [e.g., pytest, XCTest, cargo test or NEEDS CLARIFICATION]  
-**Target Platform**: [e.g., Linux server, iOS 15+, WASM or NEEDS CLARIFICATION]
-**Project Type**: [e.g., library/cli/web-service/mobile-app/compiler/desktop-app or NEEDS CLARIFICATION]  
-**Performance Goals**: [domain-specific, e.g., 1000 req/s, 10k lines/sec, 60 fps or NEEDS CLARIFICATION]  
-**Constraints**: [domain-specific, e.g., <200ms p95, <100MB memory, offline-capable or NEEDS CLARIFICATION]  
-**Scale/Scope**: [domain-specific, e.g., 10k users, 1M LOC, 50 screens or NEEDS CLARIFICATION]
+**Language/Version**: TypeScript 5.x / Node.js 20+ + Next.js 16  
+**Primary Dependencies**: Gemini 1.5 Pro API, Supabase SSR, Zod, react-pdf/renderer (PDF), Portone (Payment)  
+**Storage**: Supabase PostgreSQL (RLS enabled), Supabase Storage (PDF/Assets)  
+**Testing**: Vitest (Unit/Integration), Playwright (E2E/Visual)  
+**Target Platform**: Vercel (Edge/Serverless)
+**Project Type**: AI-Powered Web Service / Viral Engine  
+**Performance Goals**: <3s Artifact Generation, 99.9% Payment Success Rate  
+**Constraints**: Zero Trust Security, 3-Strike Debugging Rule, Strictly Anonymized Trends  
+**Scale/Scope**: Viral Growth (10k+ concurrent), Premium Expert Reports, Global Social Sharing
 
 ## Constitution Check
 

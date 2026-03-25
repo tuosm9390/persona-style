@@ -12,7 +12,7 @@ export const createClient = () => {
     if (typeof window === "undefined") {
       return createBrowserClient(
         "https://placeholder-project.supabase.co",
-        "placeholder-anon-key"
+        "placeholder-anon-key",
       );
     }
     throw new Error("Supabase URL and Anon Key are required");
@@ -21,7 +21,7 @@ export const createClient = () => {
 };
 
 // 기존 코드와의 호환성을 위해 기본 클라이언트를 생성해둡니다.
-export const supabase = (supabaseUrl && supabaseAnonKey) ? createClient() : null;
+export const supabase = supabaseUrl && supabaseAnonKey ? createClient() : null;
 
 /**
  * Supabase가 설정되어 있는지 확인하는 유틸리티 함수입니다.

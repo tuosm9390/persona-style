@@ -8,7 +8,7 @@ export type Language = "ko" | "en";
 
 interface LanguageContextType {
   language: Language;
-  t: (key: string) => any;
+  t: (key: string) => string;
   changeLanguage: (lang: Language) => void;
 }
 
@@ -16,55 +16,52 @@ const LanguageContext = createContext<LanguageContextType | undefined>(undefined
 
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
   const [language, setLanguage] = useState<Language>("ko");
-  const [isClient, setIsClient] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
-    setIsClient(true);
-    const saved = localStorage.getItem("persona-style-lang") as Language;
+    const saved = localStorage.getItem("persona-style-lang") as Language | null;
     if (saved && (saved === "ko" || saved === "en")) {
       setLanguage(saved);
-    } else {
-      // Default to browser language or 'ko' if not set
+    } else if (typeof navigator !== "undefined") {
       const browserLang = navigator.language.startsWith("en") ? "en" : "ko";
       setLanguage(browserLang);
     }
+    // Set mounted last to avoid synchronous render loop
+    setIsMounted(true);
   }, []);
 
   const changeLanguage = (lang: Language) => {
     setLanguage(lang);
-    localStorage.setItem("persona-style-lang", lang);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("persona-style-lang", lang);
+    }
   };
 
-  const t = (key: string): any => {
+  const t = (key: string): string => {
     const keys = key.split(".");
     let value: any = language === "ko" ? ko : en;
 
     for (const k of keys) {
       if (value && typeof value === "object" && k in value) {
-        value = value[k as keyof typeof value];
+        value = (value as Record<string, any>)[k];
       } else {
         console.warn(`Translation missing for key: ${key}`);
-        return key; // Fallback
+        return key;
       }
     }
-    return value;
+    
+    return typeof value === "string" ? value : key;
   };
 
-  if (!isClient) {
-    // Return children directly or a loading state to avoid hydration mismatch
-    // But since we defaulted to 'ko' in state, we can just render.
-    // However, to be safe with hydration, we might want to wait until client, 
-    // or accept that initial render matches 'ko'.
-    // Here we choose to render, assuming 'ko' is safe default.
-    return (
-      <LanguageContext.Provider value={{ language: "ko", t, changeLanguage }}>
-        {children}
-      </LanguageContext.Provider>
-    );
-  }
+  // Consistent value during hydration
+  const contextValue = {
+    language: isMounted ? language : "ko",
+    t,
+    changeLanguage
+  };
 
   return (
-    <LanguageContext.Provider value={{ language, t, changeLanguage }}>
+    <LanguageContext.Provider value={contextValue}>
       {children}
     </LanguageContext.Provider>
   );

@@ -147,7 +147,7 @@ export default function HistoryPage() {
         <Header />
         <main className="container flex-1 py-12 px-4 md:px-6">
           <AnalysisResultDisplay
-            result={selectedItem.result}
+            result={{ ...selectedItem.result, id: selectedItem.id }}
             onReset={handleBackToList}
             resetLabel="목록으로 돌아가기"
           />

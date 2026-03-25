@@ -53,11 +53,21 @@ export async function compressImage(
 }
 
 // Helper function to format text with line breaks for better readability
-// Splits by period followed by space, or just period at end of string
 export function formatTextWithLineBreaks(text: string): string[] {
   if (!text) return [];
-  // Lookbehind (?<=\.) matches position after a period
-  return text.split(/(?<=\.)\s+/);
+  // First split by explicit newline characters
+  const lines = text.split(/\r?\n/);
+
+  // Then for each line, if it's too long and contains periods, split by periods
+  return lines
+    .flatMap((line) => {
+      if (line.length > 100) {
+        // Split by period followed by space
+        return line.split(/(?<=\.)\s+/);
+      }
+      return line;
+    })
+    .filter((line) => line.trim() !== "");
 }
 
 /**

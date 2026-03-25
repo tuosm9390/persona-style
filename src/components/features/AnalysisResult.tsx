@@ -1,14 +1,13 @@
 "use client";
 
 import * as React from "react";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
   Sparkles,
   Palette,
   Shirt,
-  Gem,
   ListChecks,
   ChevronRight,
   ArrowLeft,
@@ -59,51 +58,6 @@ function ColorChip({ color }: { color: string }) {
       {color}
     </span>
   );
-}
-
-function getColorValue(colorName: string): string {
-  const normalizedColorName = colorName.toLowerCase();
-  const colorMap: Record<string, string> = {
-    화이트: "#FFFFFF",
-    white: "#FFFFFF",
-    아이보리: "#FFFFF0",
-    ivory: "#FFFFF0",
-    베이지: "#F5F5DC",
-    beige: "#F5F5DC",
-    그레이: "#808080",
-    gray: "#808080",
-    차콜: "#36454F",
-    charcoal: "#36454F",
-    블랙: "#000000",
-    black: "#000000",
-    네이비: "#000080",
-    navy: "#000080",
-    레드: "#DC143C",
-    red: "#DC143C",
-    코랄: "#FF7F50",
-    coral: "#FF7F50",
-    피치: "#FFE5B4",
-    peach: "#FFE5B4",
-    오렌지: "#FF8C00",
-    orange: "#FF8C00",
-    옐로우: "#FFD700",
-    yellow: "#FFD700",
-    브라운: "#8B4513",
-    brown: "#8B4513",
-    블루: "#4169E1",
-    blue: "#4169E1",
-    그린: "#228B22",
-    green: "#228B22",
-    퍼플: "#9370DB",
-    purple: "#9370DB",
-    핑크: "#FFC0CB",
-    pink: "#FFC0CB",
-  };
-
-  for (const [key, value] of Object.entries(colorMap)) {
-    if (normalizedColorName.includes(key)) return value;
-  }
-  return "linear-gradient(135deg, #667eea 0%, #764ba2 100%)";
 }
 
 function getIconForType(type: string, value: string) {
@@ -183,6 +137,9 @@ function getFashionIcon(type: string) {
   }
 }
 
+import { toPng } from "html-to-image";
+import { X, Save } from "lucide-react";
+
 export function AnalysisResultDisplay({
   result,
   onReset,
@@ -192,29 +149,45 @@ export function AnalysisResultDisplay({
   const router = useRouter();
   const actualResetLabel = resetLabel || t("common.retryAnalysis");
   const cardRef = React.useRef<HTMLDivElement>(null);
-  const [isDownloading, setIsDownloading] = React.useState(false);
+  const [isGenerating, setIsGenerating] = React.useState(false);
+  const [previewImage, setPreviewImage] = React.useState<string | null>(null);
 
-  const handleDownload = async () => {
-    const analysisId = (result as any).id;
-    if (!analysisId) {
-      toast.error(t("common.error"));
-      return;
-    }
-    setIsDownloading(true);
+  const handlePreview = async () => {
+    if (!cardRef.current) return;
+
+    setIsGenerating(true);
     try {
-      const link = document.createElement("a");
-      link.href = `/api/share/${analysisId}`;
-      link.download = `persona-style-${analysisId}.png`;
-      link.click();
+      // Ensure smooth rendering
+      await new Promise((resolve) => setTimeout(resolve, 300));
+
+      const dataUrl = await toPng(cardRef.current, {
+        cacheBust: true,
+        width: 540,
+        height: 960,
+        pixelRatio: 2,
+      });
+
+      setPreviewImage(dataUrl);
     } catch (err) {
+      console.error("Image generation error:", err);
       toast.error(t("common.error"));
     } finally {
-      setIsDownloading(false);
+      setIsGenerating(false);
     }
   };
 
+  const handleDownload = () => {
+    if (!previewImage) return;
+    const link = document.createElement("a");
+    link.download = `persona-style-${result.summary.title.replace(/\s+/g, "-").toLowerCase()}.png`;
+    link.href = previewImage;
+    link.click();
+    setPreviewImage(null);
+    toast.success(t("common.save") || "이미지가 저장되었습니다.");
+  };
+
   const handleShare = async () => {
-    const analysisId = (result as any).id;
+    const analysisId = result.id;
     if (!analysisId) return;
     const shareUrl = `${window.location.origin}/analyze/${analysisId}`;
     if (navigator.share) {
@@ -236,6 +209,50 @@ export function AnalysisResultDisplay({
   return (
     <div className="mx-auto max-w-4xl space-y-8 pb-16 pt-20">
       <ShareCard result={result} cardRef={cardRef} />
+
+      {/* Preview Modal */}
+      <AnimatePresence>
+        {previewImage && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              className="relative bg-background rounded-3xl overflow-hidden shadow-2xl max-w-[400px] w-full flex flex-col"
+            >
+              <div className="p-4 border-b flex items-center justify-between">
+                <h3 className="font-bold text-sm">카드 미리보기</h3>
+                <button
+                  onClick={() => setPreviewImage(null)}
+                  className="p-1 hover:bg-muted rounded-full"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+              <div className="p-6 bg-muted/30 flex justify-center">
+                <img
+                  src={previewImage}
+                  alt="Preview"
+                  className="w-full h-auto rounded-xl shadow-lg border"
+                />
+              </div>
+              <div className="p-6 space-y-3">
+                <p className="text-xs text-muted-foreground text-center">
+                  인스타그램 스토리(9:16)에 최적화된 이미지입니다.
+                </p>
+                <Button
+                  onClick={handleDownload}
+                  className="w-full rounded-full h-12 font-bold shadow-lg shadow-primary/20"
+                >
+                  <Save className="mr-2 h-4 w-4" />
+                  이미지로 저장하기
+                </Button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
       <motion.div
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
@@ -248,13 +265,13 @@ export function AnalysisResultDisplay({
           </div>
           <div className="flex gap-2">
             <Button
-              onClick={handleDownload}
-              disabled={isDownloading}
+              onClick={handlePreview}
+              disabled={isGenerating}
               variant="outline"
               size="sm"
               className="rounded-full shadow-sm"
             >
-              {isDownloading ? (
+              {isGenerating ? (
                 <span className="animate-spin mr-2">◌</span>
               ) : (
                 <Download className="mr-2 h-4 w-4" />
@@ -407,11 +424,14 @@ export function AnalysisResultDisplay({
                   <div className="mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-background text-primary">
                     {getIconForType(item.type, item.value)}
                   </div>
-                  <div>
+                  <div className="flex-1 min-w-0">
                     <p className="text-xs font-semibold text-muted-foreground uppercase">
                       {item.label}
                     </p>
-                    <p className="text-base font-medium">{item.value}</p>
+                    <FormattedText
+                      text={item.value}
+                      className="text-base font-medium"
+                    />
                   </div>
                 </div>
               ))}
@@ -616,7 +636,7 @@ export function AnalysisResultDisplay({
           variant="default"
           size="lg"
           onClick={() =>
-            router.push(`/checkout?analysis_id=${(result as any).id}`)
+            router.push(`/checkout?analysis_id=${result.id}`)
           }
           className="rounded-full bg-primary text-primary-foreground hover:bg-primary/90 shadow-xl shadow-primary/20 group relative overflow-hidden h-14 px-8 border-none"
         >

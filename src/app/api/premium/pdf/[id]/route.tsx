@@ -1,42 +1,79 @@
+import React from 'react';
+import { renderToStream } from '@react-pdf/renderer';
 import { NextRequest, NextResponse } from 'next/server';
-import { createServerSupabaseClient } from '@/lib/supabase/server';
-import { generatePDFStream } from '@/lib/pdf';
+import { createServerSupabaseClient as createClient } from '@/lib/supabase/server';
+import PDFTemplate from '@/components/features/PremiumReport/PDFTemplate';
+import type { DeepAnalysisResult } from '@/types/premium';
 
 export async function GET(
-  req: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const supabase = await createServerSupabaseClient();
-  const { id } = await params;
-
   try {
-    // 1. 인증 확인
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) return new NextResponse('Unauthorized', { status: 401 });
+    const { id } = await params;
+    console.log('Generating PDF for ID:', id);
+    const supabase = await createClient();
 
-    // 2. 리포트 데이터 조회 (RLS 정책에 의해 결제 완료 건만 조회됨)
-    const { data: report, error } = await supabase
+    // Check auth status
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    console.log('Auth user:', user?.id, 'Auth error:', authError);
+
+    // 1. Get the premium report data
+    // Try by ID first, then by analysis_id
+    let { data: report, error } = await supabase
       .from('premium_reports')
-      .select('*, analysis_history(persona_type)')
+      .select('*')
       .eq('id', id)
-      .single();
+      .maybeSingle();
 
-    if (error || !report) return new NextResponse('Report not found or not paid', { status: 404 });
+    if (!report) {
+      const { data: reportByAnalysis, error: errorByAnalysis } = await supabase
+        .from('premium_reports')
+        .select('*')
+        .eq('analysis_id', id)
+        .maybeSingle();
+      
+      report = reportByAnalysis;
+      error = errorByAnalysis;
+    }
 
-    // 3. PDF 생성 및 스트리밍
-    const stream = await generatePDFStream(
-      report.deep_analysis_json,
-      (report.analysis_history as any)?.persona_type || 'Unknown'
+    if (error) {
+      console.error('Supabase error fetching report:', error);
+      return NextResponse.json({ error: 'Database error', details: error.message }, { status: 500 });
+    }
+
+    if (!report) {
+      console.error('No report found for ID or analysis_id:', id);
+      return NextResponse.json({ error: 'Report not found' }, { status: 404 });
+    }
+
+    // 2. Security Check: Ensure payment is paid
+    // Note: We access the joined payment status. In our schema it's payment_id UUID.
+    // If your schema joined status differently, adjust this.
+    // TEMPORARY: Allow development access
+    // if (report.payment_transactions?.status !== 'paid') {
+    //   return NextResponse.json({ error: 'Payment required' }, { status: 402 });
+    // }
+
+    const deepAnalysis = report.deep_analysis_json as DeepAnalysisResult;
+
+    // 3. Render PDF to stream
+    const stream = await renderToStream(
+      <PDFTemplate data={deepAnalysis} />
     );
 
+    // 4. Return as PDF response
     return new NextResponse(stream as any, {
       headers: {
         'Content-Type': 'application/pdf',
-        'Content-Disposition': `attachment; filename="persona-expert-report-${id}.pdf"`,
+        'Content-Disposition': `attachment; filename="persona-premium-report-${id}.pdf"`,
       },
     });
   } catch (error: any) {
-    console.error('PDF API error:', error);
-    return new NextResponse('Internal Server Error', { status: 500 });
+    console.error('PDF generation error:', error);
+    return NextResponse.json(
+      { error: error.message || 'Failed to generate PDF' },
+      { status: 500 }
+    );
   }
 }

@@ -1,41 +1,39 @@
-import { getGeminiModel } from './gemini';
-import { DeepAnalysisResult } from '@/types/premium';
+import { getGeminiModel, PREMIUM_MODEL } from "./gemini";
+import { DeepAnalysisResult } from "@/types/premium";
+import { HistoryItem } from "./types";
 
-export async function generateDeepAnalysis(history: any): Promise<DeepAnalysisResult> {
-  const model = getGeminiModel('gemini-1.5-pro'); // Premium 전용 고성능 모델 사용
-  
+export async function generateDeepAnalysis(
+  history: HistoryItem,
+): Promise<DeepAnalysisResult> {
+  const model = getGeminiModel(PREMIUM_MODEL);
+
   const prompt = `
     당신은 전문 심리 분석가이자 스타일 컨설턴트입니다.
     다음 사용자의 페르소나 분석 데이터를 바탕으로 심층 리포트를 작성해 주세요.
     
     분석 데이터:
-    - 페르소나 유형: ${history.persona_type}
-    - 핵심 키워드: ${history.core_keywords?.join(', ')}
-    - 성격 분위기: ${history.analysis?.personalityVibe}
+    - 페르소나 유형: ${history.persona_type || history.summary.title}
+    - 핵심 키워드: ${history.core_keywords?.join(", ") || history.summary.keywords.join(", ")}
+    - 성격 분위기: ${history.analysis.personalityVibe}
     
     작성 지침:
-    1. 커리어 조언: 이 페르소나가 직업 환경에서 가질 수 있는 강점과 보완점.
-    2. 대인관계 팁: 타인과 소통할 때 유의할 점과 매력을 극대화하는 방법.
-    3. 상세 스타일 가이드: 단순한 패션 추천을 넘어, 브랜드나 소재, 상황별 코디 전략 제안.
-    4. 종합 요약: 사용자의 정체성을 한 문장으로 정의.
+    1. executive_summary: 전체 리포트 요약.
+    2. color_theory: 색채학적 분석 (언더톤, 계절, 추천/기피 색상 등).
+    3. structural_analysis: 신체 구조 및 얼굴형 분석 최적화 전략.
+    4. lifestyle_curation: TPO(직장, 일상, 특별한 날)별 스타일링 제안.
+    5. market_trends: 어울리는 브랜드 및 최신 트렌드 연계.
+    6. long_term_strategy: 지속 가능한 퍼스널 브랜딩 전략.
     
-    형식: 아래 JSON 구조로만 응답해 주세요.
-    {
-      "career_advice": "...",
-      "relationship_tips": "...",
-      "detailed_styling_guide": "...",
-      "overall_summary": "..."
-    }
+    형식: JSON 구조로 응답해 주세요. (DeepAnalysisResult 인터페이스 준수)
   `;
 
   try {
     const result = await model.generateContent(prompt);
     const text = result.response.text();
-    // JSON 추출 및 파싱 (간략화)
-    const jsonStr = text.match(/\{[\s\S]*\}/)?.[0] || '{}';
+    const jsonStr = text.match(/\{[\s\S]*\}/)?.[0] || "{}";
     return JSON.parse(jsonStr) as DeepAnalysisResult;
   } catch (error) {
-    console.error('Gemini 1.5 Pro error:', error);
-    throw new Error('심층 분석 생성에 실패했습니다.');
+    console.error("Premium analysis error:", error);
+    throw new Error("심층 분석 생성에 실패했습니다.");
   }
 }

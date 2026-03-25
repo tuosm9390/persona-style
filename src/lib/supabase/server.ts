@@ -19,7 +19,7 @@ export const createServerSupabaseClient = async () => {
       setAll(cookiesToSet) {
         try {
           cookiesToSet.forEach(({ name, value, options }) =>
-            cookieStore.set(name, value, options)
+            cookieStore.set(name, value, options),
           );
         } catch {
           // 서버 컴포넌트에서 호출될 경우 setAll이 무시될 수 있습니다.

@@ -5,7 +5,6 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
-import { FormattedText } from "@/components/ui/formatted-text";
 import { ArrowRight, Sparkles, Upload } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 

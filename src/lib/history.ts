@@ -17,23 +17,24 @@ const MAX_HISTORY_ITEMS = 20;
 export async function saveAnalysisToHistory(
   result: AnalysisResult,
   inputType: "photo" | "text" | "combined",
-): Promise<void> {
+  isPublic: boolean = true,
+): Promise<string> {
+  const generatedId = `analysis_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
   const newItem: AnalysisHistoryItem = {
-    id: `analysis_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`,
+    id: generatedId,
     timestamp: Date.now(),
     result,
     inputType,
   };
 
   try {
-    // 1. Try Supabase if configured
     if (isSupabaseConfigured()) {
       const {
         data: { session },
       } = await supabase!.auth.getSession();
 
       if (session?.user) {
-        const { error } = await supabase!.from("analysis_history").insert({
+        const { data, error } = await supabase!.from("analysis_history").insert({
           user_id: session.user.id,
           input_type: inputType,
           summary: result.summary,
@@ -42,11 +43,14 @@ export async function saveAnalysisToHistory(
           beauty: result.beauty,
           action_items: result.actionItems,
           visual_profile: result.profile,
-        });
+          is_public: isPublic,
+          persona_type: result.summary.title,
+          core_keywords: result.summary.keywords,
+        }).select('id').single();
 
-        if (!error) {
-          console.log("Saved to Supabase successfully");
-          return; // 성공 시 여기서 종료, 로컬 스토리지에는 저장 안함 (선택적)
+        if (!error && data) {
+          console.log("Saved to Supabase successfully:", data.id);
+          return data.id;
         } else {
           console.error("Supabase save error, falling back to local:", error);
         }
@@ -56,14 +60,57 @@ export async function saveAnalysisToHistory(
     console.error("Supabase interaction failed:", error);
   }
 
-  // 2. Fallback to LocalStorage
+  // Fallback to LocalStorage
   try {
-    const history = await getAnalysisHistory(); // now returns Promise
+    const history = await getAnalysisHistory();
     const updatedHistory = [newItem, ...history].slice(0, MAX_HISTORY_ITEMS);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedHistory));
+    return generatedId;
   } catch (error) {
     console.error("Failed to save analysis to history:", error);
+    return generatedId;
   }
+}
+
+/**
+ * Get public feed from Supabase
+ */
+export async function getPublicFeed(
+  limit: number = 20,
+  offset: number = 0,
+): Promise<AnalysisHistoryItem[]> {
+  try {
+    if (isSupabaseConfigured()) {
+      const { data, error } = await supabase!
+        .from("analysis_history")
+        .select("*") // Removed invalid join with auth.users
+        .eq("is_public", true)
+        .order("created_at", { ascending: false })
+        .range(offset, offset + limit - 1);
+
+      if (!error && data) {
+        return data.map((row) => ({
+          id: row.id,
+          timestamp: new Date(row.created_at).getTime(),
+          inputType: row.input_type as "photo" | "text" | "combined",
+          result: {
+            summary: row.summary,
+            analysis: row.analysis,
+            fashion: row.fashion,
+            beauty: row.beauty,
+            actionItems: row.action_items,
+            profile: row.visual_profile,
+          },
+          // Extra fields for feed
+          user_email: row.user_id, // Placeholder
+          share_count: row.share_count || 0,
+        }));
+      }
+    }
+  } catch (error) {
+    console.error("Supabase feed fetch error:", error);
+  }
+  return [];
 }
 
 /**

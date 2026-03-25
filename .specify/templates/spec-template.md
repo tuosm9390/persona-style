@@ -99,8 +99,8 @@
 
 *Example of marking unclear requirements:*
 
-- **FR-006**: System MUST authenticate users via [NEEDS CLARIFICATION: auth method not specified - email/password, SSO, OAuth?]
-- **FR-007**: System MUST retain user data for [NEEDS CLARIFICATION: retention period not specified]
+- **FR-006**: System MUST authenticate users via Supabase Auth (Supporting Google OAuth and Email/Password).
+- **FR-007**: System MUST retain user analysis data for at least 1 year, or until explicit deletion request from the user.
 
 ### Key Entities *(include if feature involves data)*
 

@@ -92,3 +92,21 @@ export interface AnalyzeRequest {
   image?: string; // base64 encoded
   text?: string;
 }
+
+export interface HistoryItem {
+  id: string;
+  user_id: string;
+  input_type: "photo" | "text" | "combined";
+  summary: AnalysisResult["summary"];
+  analysis: AnalysisResult["analysis"];
+  fashion: AnalysisResult["fashion"];
+  beauty: AnalysisResult["beauty"];
+  action_items: AnalysisResult["actionItems"];
+  visual_profile?: VisualAnalysisProfile;
+  persona_type?: string;
+  core_keywords?: string[];
+  is_public: boolean;
+  share_count: number;
+  created_at: string;
+  language?: "ko" | "en";
+}

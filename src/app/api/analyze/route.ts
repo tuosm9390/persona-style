@@ -5,9 +5,7 @@ import {
   getImageAnalysisPrompt,
   getCombinedAnalysisPrompt,
 } from "@/lib/prompts";
-import { visualAnalysisSchema } from "@/lib/validation";
-import { ko } from "@/lib/i18n/ko";
-import { en } from "@/lib/i18n/en";
+import { visualAnalysisSchema, analyzeRequestSchema, validateRequest } from "@/lib/validation";
 
 /**
  * Parse Gemini API retry delay from error message
@@ -71,21 +69,17 @@ export async function POST(request: NextRequest) {
   let language = "ko";
   try {
     const body = await request.json();
-    const { image, text, language: langParam } = body as { image?: string; text?: string; language?: string };
-    if (langParam) language = langParam;
+    const validation = await validateRequest(analyzeRequestSchema, body);
 
-    // Translation helper for error messages
-    const t = language === "ko" ? ko : en;
-
-    if (!image && !text) {
-      return NextResponse.json(
-        { error: "Image or text input is required." },
-        { status: 400 }
-      );
+    if (!validation.success) {
+      return NextResponse.json({ error: validation.error }, { status: 400 });
     }
 
+    const { image, text, language: langParam } = validation.data;
+    language = langParam;
+
     const prompt = buildPrompt(image, text, language);
-    let lastError: any = null;
+    let lastError: Error | null = null;
 
     // Try each model in fallback order
     for (const modelName of FALLBACK_MODELS) {
@@ -109,7 +103,6 @@ export async function POST(request: NextRequest) {
             const validation = visualAnalysisSchema.safeParse(analysisResult.profile);
             if (!validation.success) {
               console.error("Visual profile validation failed:", validation.error.format());
-              // Optional: throw new Error("분석 데이터 형식이 올바르지 않습니다.");
             }
           }
 
@@ -119,7 +112,7 @@ export async function POST(request: NextRequest) {
             model: modelName,
           });
         } catch (error: any) {
-          lastError = error;
+          lastError = error as Error;
           const is429 =
             error.status === 429 || error.message?.includes("429");
 

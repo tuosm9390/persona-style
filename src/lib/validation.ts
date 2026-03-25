@@ -1,5 +1,17 @@
 import { z } from "zod";
 
+export const analyzeRequestSchema = z.object({
+  image: z.string().optional(),
+  text: z.string().optional(),
+  language: z.enum(["ko", "en"]).default("ko"),
+}).refine(data => data.image || data.text, {
+  message: "Either image or text must be provided",
+});
+
+export const premiumAnalyzeRequestSchema = z.object({
+  analysis_id: z.string().uuid(),
+});
+
 export const matchRequestSchema = z.object({
   source_id: z.string().uuid(),
   target_id: z.string().uuid(),

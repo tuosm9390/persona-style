@@ -7,7 +7,7 @@ npm install @react-pdf/renderer
 ```
 
 ## 2. Gemini 1.5 Pro Integration
-`src/lib/premium.ts`에 심층 분석 전용 프롬프트를 작성합니다. 기존 `gemini.ts`의 인프라를 활용하되, 모델명을 `gemini-1.5-pro`로 지정하여 호출합니다.
+`src/lib/premium.ts`에 심층 분석 전용 프롬프트를 작성합니다. 기존 `gemini.ts`의 인프라를 활용하되, 모델명을 `PREMIUM_MODEL` (기본값: `gemini-2.5-pro`)로 지정하여 호출합니다.
 
 ## 3. PDF Layout Design
 `src/components/features/PremiumReport/PDFTemplate.tsx` 파일을 생성하고 `react-pdf/renderer`의 `Document`, `Page`, `View`, `Text` 컴포넌트를 사용하여 A4 레이아웃을 구성합니다.

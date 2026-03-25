@@ -58,8 +58,10 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // TODO: Implement server-side language detection from cookies if needed
+  // For now, keeping it as a server component but allowing the attribute to be managed
   return (
-    <html lang="en">
+    <html lang="ko" suppressHydrationWarning>
       <body
         className={cn(
           "min-h-screen bg-background font-sans antialiased break-keep",
