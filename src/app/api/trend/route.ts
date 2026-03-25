@@ -1,14 +1,13 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
-import { cookies } from 'next/headers';
-import { getPersonaStats, refreshStats } from '@/lib/trend';
+import { NextRequest, NextResponse } from "next/server";
+import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { getPersonaStats, refreshStats } from "@/lib/trend";
 
 export async function GET(req: NextRequest) {
-  const supabase = createRouteHandlerClient({ cookies });
-  
+  const supabase = await createServerSupabaseClient();
+
   try {
     // Vercel Cron Job 호출 시 또는 수동 갱신 파라미터가 있을 때만 갱신
-    const refresh = req.nextUrl.searchParams.get('refresh') === 'true';
+    const refresh = req.nextUrl.searchParams.get("refresh") === "true";
     if (refresh) {
       await refreshStats(supabase);
     }
@@ -19,7 +18,10 @@ export async function GET(req: NextRequest) {
       distributions: stats,
     });
   } catch (error: any) {
-    console.error('Trend API error:', error);
-    return NextResponse.json({ error: 'Failed to fetch trends' }, { status: 500 });
+    console.error("Trend API error:", error);
+    return NextResponse.json(
+      { error: "Failed to fetch trends" },
+      { status: 500 },
+    );
   }
 }

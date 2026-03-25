@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, Suspense } from 'react';
 import PricingCard from '@/components/features/Payment/PricingCard';
 import { toast } from 'sonner';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -11,7 +11,7 @@ declare global {
   }
 }
 
-export default function CheckoutPage() {
+function CheckoutContent() {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -77,5 +77,13 @@ export default function CheckoutPage() {
       
       <PricingCard onUpgrade={handlePayment} isLoading={isLoading} />
     </div>
+  );
+}
+
+export default function CheckoutPage() {
+  return (
+    <Suspense fallback={<div className="flex justify-center py-20">Loading checkout...</div>}>
+      <CheckoutContent />
+    </Suspense>
   );
 }

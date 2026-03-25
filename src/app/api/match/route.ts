@@ -1,11 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
-import { cookies } from 'next/headers';
+import { createServerSupabaseClient } from '@/lib/supabase/server';
 import { calculatePersonaMatch } from '@/lib/matching';
 import { matchRequestSchema, validateRequest } from '@/lib/validation';
 
 export async function POST(req: NextRequest) {
-  const supabase = createRouteHandlerClient({ cookies });
+  const supabase = await createServerSupabaseClient();
   
   // 1. 세션 확인
   const { data: { session } } = await supabase.auth.getSession();

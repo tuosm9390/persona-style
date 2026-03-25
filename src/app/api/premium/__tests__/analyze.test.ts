@@ -1,12 +1,13 @@
+import { describe, it, expect, vi } from 'vitest';
 import { POST } from '../analyze/route';
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
+import { createServerSupabaseClient } from '@/lib/supabase/server';
 
-jest.mock('@supabase/auth-helpers-nextjs');
+vi.mock('@/lib/supabase/server');
 
 describe('POST /api/premium/analyze', () => {
   it('should return 401 if unauthorized', async () => {
-    (createRouteHandlerClient as jest.Mock).mockReturnValue({
-      auth: { getSession: jest.fn().mockResolvedValue({ data: { session: null } }) }
+    (createServerSupabaseClient as any).mockResolvedValue({
+      auth: { getSession: vi.fn().mockResolvedValue({ data: { session: null } }) }
     });
 
     const response = await POST(new Request('http://localhost/api/premium/analyze', {
