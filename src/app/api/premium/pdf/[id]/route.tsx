@@ -56,10 +56,11 @@ export async function GET(
     // }
 
     const deepAnalysis = report.deep_analysis_json as DeepAnalysisResult;
+    const personaType = report.persona_type || 'Unknown';
 
     // 3. Render PDF to stream
     const stream = await renderToStream(
-      <PDFTemplate data={deepAnalysis} />
+      <PDFTemplate data={deepAnalysis} personaType={personaType} />
     );
 
     // 4. Return as PDF response
@@ -69,10 +70,11 @@ export async function GET(
         'Content-Disposition': `attachment; filename="persona-premium-report-${id}.pdf"`,
       },
     });
-  } catch (error: any) {
-    console.error('PDF generation error:', error);
+  } catch (err: unknown) {
+    console.error('PDF generation error:', err);
+    const message = err instanceof Error ? err.message : 'Failed to generate PDF';
     return NextResponse.json(
-      { error: error.message || 'Failed to generate PDF' },
+      { error: message },
       { status: 500 }
     );
   }

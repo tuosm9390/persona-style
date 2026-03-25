@@ -31,8 +31,9 @@ export default function MatchPage() {
 
       setResult(data);
       toast.success('궁합 분석이 완료되었습니다!');
-    } catch (error: any) {
-      toast.error(error.message || '매칭 분석에 실패했습니다.');
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : '매칭 분석에 실패했습니다.';
+      toast.error(message);
     } finally {
       setIsLoading(false);
     }

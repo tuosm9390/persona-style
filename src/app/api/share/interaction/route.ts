@@ -27,8 +27,9 @@ export async function POST(request: NextRequest) {
     if (finalError) throw finalError;
 
     return NextResponse.json({ success: true });
-  } catch (error: any) {
-    console.error("Interaction error:", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : "Internal Server Error";
+    console.error("Interaction error:", err);
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

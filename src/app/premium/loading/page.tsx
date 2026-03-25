@@ -31,7 +31,7 @@ function PremiumLoadingContent() {
       try {
         // Start steps animation
         const interval = setInterval(() => {
-          setStep((s) => (s < steps.length - 1 ? s + 1 : s));
+          setStep((s: number) => (s < steps.length - 1 ? s + 1 : s));
         }, 3000);
 
         const response = await fetch("/api/premium/analyze", {

@@ -71,7 +71,7 @@ export async function GET(
       .update({ share_count: (history.share_count || 0) + 1 })
       .eq('id', id);
 
-    return new NextResponse(pngBuffer, {
+    return new NextResponse(new Uint8Array(pngBuffer), {
       headers: {
         'Content-Type': 'image/png',
         'Cache-Control': 'public, max-age=31536000, immutable',

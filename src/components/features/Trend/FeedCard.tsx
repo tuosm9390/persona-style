@@ -34,7 +34,7 @@ export function FeedCard({ item, index }: FeedCardProps) {
     if (isLiked) return;
     
     // Optimistic update
-    setLikes(prev => prev + 1);
+    setLikes((prev: number) => prev + 1);
     setIsDark(true);
     
     try {

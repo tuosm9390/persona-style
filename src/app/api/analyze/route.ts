@@ -111,14 +111,16 @@ export async function POST(request: NextRequest) {
             result: analysisResult,
             model: modelName,
           });
-        } catch (error: any) {
-          lastError = error as Error;
-          const is429 =
-            error.status === 429 || error.message?.includes("429");
+        } catch (err: unknown) {
+          lastError = err instanceof Error ? err : new Error(String(err));
+          
+          // Type guard for potential status property from Gemini API error
+          const status = (err && typeof err === 'object' && 'status' in err) ? (err as { status: number }).status : undefined;
+          const is429 = status === 429 || lastError.message?.includes("429");
 
           if (is429) {
             // Check for Hard Project Limits (Spending Cap)
-            if (isSpendingCapExceeded(error.message)) {
+            if (isSpendingCapExceeded(lastError.message)) {
               console.error("🚨 PROJECT CRITICAL: Spending cap exceeded. All Gemini requests blocked.");
               return NextResponse.json(
                 {
@@ -133,7 +135,7 @@ export async function POST(request: NextRequest) {
             }
 
             // If daily quota is fully gone (limit: 0), skip to next model
-            if (isDailyQuotaExhausted(error.message)) {
+            if (isDailyQuotaExhausted(lastError.message)) {
               console.log(
                 `❌ ${modelName}: Daily quota exhausted (limit: 0). Trying next model...`
               );
@@ -141,7 +143,7 @@ export async function POST(request: NextRequest) {
             }
 
             // Temporary rate limit — wait and retry with same model
-            const retryDelay = parseRetryDelay(error.message) || 3000;
+            const retryDelay = parseRetryDelay(lastError.message) || 3000;
             if (attempt < 1) {
               console.log(
                 `⏳ ${modelName}: Temporary rate limit. Waiting ${retryDelay}ms...`
@@ -153,12 +155,12 @@ export async function POST(request: NextRequest) {
 
           // Non-429 errors or exhausted retries — try next model
           console.log(
-            `❌ ${modelName} attempt ${attempt + 1} failed: ${error.message?.slice(0, 100)}`
+            `❌ ${modelName} attempt ${attempt + 1} failed: ${lastError.message?.slice(0, 100)}`
           );
 
           if (!is429) {
             // For non-rate-limit errors, don't try other models
-            throw error;
+            throw lastError;
           }
 
           break; // Move to next model

@@ -40,13 +40,14 @@ const styles = StyleSheet.create({
 
 interface PDFTemplateProps {
   data: DeepAnalysisResult;
+  personaType: string;
 }
 
-const PDFTemplate: React.FC<PDFTemplateProps> = ({ data }) => (
+const PDFTemplate: React.FC<PDFTemplateProps> = ({ data, personaType }) => (
   <Document>
     <Page size="A4" style={styles.page}>
       <View style={styles.header}>
-        <Text style={styles.subtitle}>Premium Style & Brand Report</Text>
+        <Text style={styles.subtitle}>Premium Style & Brand Report | {personaType}</Text>
         <Text style={styles.title}>{data.summary.title}</Text>
         <Text style={{ fontSize: 9, color: '#666' }}>Keywords: {data.summary.keywords.join(' • ')}</Text>
       </View>
@@ -98,7 +99,7 @@ const PDFTemplate: React.FC<PDFTemplateProps> = ({ data }) => (
     <Page size="A4" style={styles.page}>
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>IV. Detailed Capsule Wardrobe</Text>
-        {data.detailedCapsuleWardrobe.map((group, index) => (
+        {data.detailedCapsuleWardrobe?.map((group, index) => (
           <View key={index} style={styles.wardrobeCard}>
             <Text style={styles.wardrobeCategory}>{group.category}</Text>
             <Text style={styles.wardrobeItems}>• {group.items.join('\n• ')}</Text>
