@@ -17,7 +17,13 @@ export const createClient = () => {
     }
     throw new Error("Supabase URL and Anon Key are required");
   }
-  return createBrowserClient(supabaseUrl, supabaseAnonKey);
+  return createBrowserClient(supabaseUrl, supabaseAnonKey, {
+    auth: {
+      persistSession: true,
+      autoRefreshToken: true,
+      detectSessionInUrl: true,
+    },
+  });
 };
 
 // 기존 코드와의 호환성을 위해 기본 클라이언트를 생성해둡니다.

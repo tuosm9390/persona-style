@@ -6,6 +6,8 @@ export interface AnalysisHistoryItem {
   timestamp: number;
   result: AnalysisResult;
   inputType: "photo" | "text" | "combined";
+  hasPremium?: boolean;
+  premiumReportId?: string;
 }
 
 const STORAGE_KEY = "personastyle_history";
@@ -83,7 +85,7 @@ export async function getPublicFeed(
     if (isSupabaseConfigured()) {
       const { data, error } = await supabase!
         .from("analysis_history")
-        .select("*") // Removed invalid join with auth.users
+        .select("*, premium_reports(id)") // Removed invalid join with auth.users
         .eq("is_public", true)
         .order("created_at", { ascending: false })
         .range(offset, offset + limit - 1);
@@ -101,6 +103,7 @@ export async function getPublicFeed(
             actionItems: row.action_items,
             profile: row.visual_profile,
           },
+          hasPremium: row.premium_reports && row.premium_reports.length > 0,
           // Extra fields for feed
           user_email: row.user_id, // Placeholder
           share_count: row.share_count || 0,
@@ -127,7 +130,7 @@ export async function getAnalysisHistory(): Promise<AnalysisHistoryItem[]> {
       if (session?.user) {
         const { data, error } = await supabase!
           .from("analysis_history")
-          .select("*")
+          .select("*, premium_reports(id)")
           .order("created_at", { ascending: false })
           .limit(MAX_HISTORY_ITEMS);
 
@@ -145,6 +148,8 @@ export async function getAnalysisHistory(): Promise<AnalysisHistoryItem[]> {
               actionItems: row.action_items,
               profile: row.visual_profile,
             },
+            hasPremium: row.premium_reports && row.premium_reports.length > 0,
+            premiumReportId: row.premium_reports?.[0]?.id,
           }));
         }
       }

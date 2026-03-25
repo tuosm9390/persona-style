@@ -41,6 +41,8 @@ interface AnalysisResultDisplayProps {
   result: AnalysisResult;
   onReset: () => void;
   resetLabel?: string;
+  hasPremium?: boolean;
+  premiumReportId?: string;
 }
 
 const sectionVariants = {
@@ -144,6 +146,8 @@ export function AnalysisResultDisplay({
   result,
   onReset,
   resetLabel,
+  hasPremium,
+  premiumReportId,
 }: AnalysisResultDisplayProps) {
   const { t } = useLanguage();
   const router = useRouter();
@@ -632,20 +636,32 @@ export function AnalysisResultDisplay({
           <ArrowLeft className="mr-2 h-4 w-4" />
           {actualResetLabel}
         </Button>
-        <Button
-          variant="default"
-          size="lg"
-          onClick={() =>
-            router.push(`/checkout?analysis_id=${result.id}`)
-          }
-          className="rounded-full bg-primary text-primary-foreground hover:bg-primary/90 shadow-xl shadow-primary/20 group relative overflow-hidden h-14 px-8 border-none"
-        >
-          <Sparkles className="mr-2 h-4 w-4 text-accent transition-transform group-hover:rotate-12" />
-          <span className="font-bold uppercase tracking-wider text-xs">
-            {t("result.premiumReport")}
-          </span>
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
-        </Button>
+        {hasPremium && premiumReportId ? (
+          <Button
+            variant="default"
+            size="lg"
+            onClick={() => router.push(`/premium/${premiumReportId}`)}
+            className="rounded-full bg-secondary text-secondary-foreground hover:bg-secondary/90 shadow-xl shadow-secondary/20 group relative overflow-hidden h-14 px-8 border-none"
+          >
+            <Sparkles className="mr-2 h-4 w-4 text-primary transition-transform group-hover:rotate-12" />
+            <span className="font-bold uppercase tracking-wider text-xs">
+              전문가 리포트 다시보기
+            </span>
+          </Button>
+        ) : (
+          <Button
+            variant="default"
+            size="lg"
+            onClick={() => router.push(`/checkout?analysis_id=${result.id}`)}
+            className="rounded-full bg-primary text-primary-foreground hover:bg-primary/90 shadow-xl shadow-primary/20 group relative overflow-hidden h-14 px-8 border-none"
+          >
+            <Sparkles className="mr-2 h-4 w-4 text-accent transition-transform group-hover:rotate-12" />
+            <span className="font-bold uppercase tracking-wider text-xs">
+              {t("result.premiumReport")}
+            </span>
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+          </Button>
+        )}
       </motion.div>
     </div>
   );

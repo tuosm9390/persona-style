@@ -31,11 +31,15 @@ export default function LoginPage() {
     if (!email) return;
 
     setIsLoading(true);
+    const redirectUrl = process.env.NEXT_PUBLIC_APP_URL 
+      ? `${process.env.NEXT_PUBLIC_APP_URL}/auth/callback`
+      : `${window.location.origin}/auth/callback`;
+
     try {
       const { error } = await supabase.auth.signInWithOtp({
         email,
         options: {
-          emailRedirectTo: `${window.location.origin}/auth/callback`,
+          emailRedirectTo: redirectUrl,
         },
       });
 
@@ -50,16 +54,32 @@ export default function LoginPage() {
       };
 
       const handleSocialLogin = async (provider: 'github' | 'google') => {
+      const redirectUrl = process.env.NEXT_PUBLIC_APP_URL 
+        ? `${process.env.NEXT_PUBLIC_APP_URL}/auth/callback`
+        : `${window.location.origin}/auth/callback`;
+      
+      console.log(`Attempting ${provider} login with redirectUrl: ${redirectUrl}`);
+
       try {
       const { error } = await supabase.auth.signInWithOAuth({
         provider,
         options: {
-          redirectTo: `${window.location.origin}/auth/callback`,
+          redirectTo: redirectUrl,
         },
       });
       if (error) throw error;
       } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : "소셜 로그인 중 오류가 발생했습니다.";
+      console.error(`${provider} login error:`, error);
+      let message = "소셜 로그인 중 오류가 발생했습니다.";
+      
+      if (error instanceof Error) {
+        if (error.message.includes("missing OAuth secret")) {
+          message = `${provider === 'google' ? 'Google' : 'Github'} 로그인 설정이 완료되지 않았습니다. 관리자에게 문의하세요.`;
+        } else {
+          message = error.message;
+        }
+      }
+      
       toast.error(message);
       }
       };

@@ -29,6 +29,7 @@ export async function GET(request: Request) {
     );
     const { error } = await supabase.auth.exchangeCodeForSession(code);
     if (!error) {
+      // 세션 교환 성공 시 홈으로 이동 (쿠키는 cookieStore.set을 통해 자동 반영됨)
       return NextResponse.redirect(`${origin}${next}`);
     }
   }

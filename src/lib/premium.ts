@@ -1,7 +1,11 @@
 import { getGeminiModel, PREMIUM_MODEL } from "./gemini";
-import { DeepAnalysisResult } from "@/types/premium";
+import { DeepAnalysisResult, PremiumReport } from "@/types/premium";
 import { HistoryItem } from "./types";
+import { createClient } from "./supabase";
 
+/**
+ * Generates deep analysis using Gemini Pro
+ */
 export async function generateDeepAnalysis(
   history: HistoryItem,
 ): Promise<DeepAnalysisResult> {
@@ -36,4 +40,46 @@ export async function generateDeepAnalysis(
     console.error("Premium analysis error:", error);
     throw new Error("심층 분석 생성에 실패했습니다.");
   }
+}
+
+/**
+ * Fetches all premium reports for the current user
+ */
+export async function getPremiumReports(): Promise<PremiumReport[]> {
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  
+  if (!user) return [];
+
+  const { data, error } = await supabase
+    .from("premium_reports")
+    .select("*")
+    .eq("user_id", user.id)
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error("Error fetching premium reports:", error);
+    return [];
+  }
+
+  return data as PremiumReport[];
+}
+
+/**
+ * Fetches a single premium report by analysis ID
+ */
+export async function getPremiumReportByAnalysisId(analysisId: string): Promise<PremiumReport | null> {
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from("premium_reports")
+    .select("*")
+    .eq("analysis_id", analysisId)
+    .maybeSingle();
+
+  if (error) {
+    console.error("Error fetching premium report:", error);
+    return null;
+  }
+
+  return data as PremiumReport;
 }

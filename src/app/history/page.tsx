@@ -150,6 +150,8 @@ export default function HistoryPage() {
             result={{ ...selectedItem.result, id: selectedItem.id }}
             onReset={handleBackToList}
             resetLabel="목록으로 돌아가기"
+            hasPremium={selectedItem.hasPremium}
+            premiumReportId={selectedItem.premiumReportId}
           />
         </main>
       </div>
@@ -237,10 +239,18 @@ export default function HistoryPage() {
                       >
                         <div className="flex items-start justify-between">
                           <div className="flex-1">
-                            <CardTitle className="text-lg flex items-center gap-2 group-hover:text-primary transition-colors">
-                              {getInputTypeIcon(item.inputType)}
-                              {item.result.summary.title}
-                            </CardTitle>
+                            <div className="flex items-center gap-2">
+                              <CardTitle className="text-lg flex items-center gap-2 group-hover:text-primary transition-colors">
+                                {getInputTypeIcon(item.inputType)}
+                                {item.result.summary.title}
+                              </CardTitle>
+                              {item.hasPremium && (
+                                <span className="inline-flex items-center rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold text-primary uppercase tracking-wider">
+                                  <Sparkles className="mr-1 h-2 w-2" />
+                                  Premium
+                                </span>
+                              )}
+                            </div>
                             <div className="flex items-center gap-2 mt-2 text-xs text-muted-foreground">
                               <Clock className="h-3 w-3" />
                               {formatDate(item.timestamp)}
