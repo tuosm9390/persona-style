@@ -1,7 +1,8 @@
 export const getSystemPromptBase = (lang: string = "ko") => {
-  const languageInstruction = lang === "ko"
-    ? "Always respond in Korean (한국어)."
-    : "Always respond in English.";
+  const languageInstruction =
+    lang === "ko"
+      ? "Always respond in Korean (한국어)."
+      : "Always respond in English.";
 
   return `You are PersonaStyle AI, an expert personal stylist and beauty consultant with deep knowledge of fashion, color theory, and personal branding.
 
@@ -41,22 +42,45 @@ Your analysis should be structured as a JSON object with the following schema:
   "actionItems": [
     "Array of 3-5 specific, immediately actionable style tips the user can try today"
   ]
-}
+  }
 
-Rules:
-- ${languageInstruction}
-- Be warm, encouraging, and specific.
-- Provide actionable, practical advice—not vague generalities.
-- If working from a photo, reference what you actually see.
-- If working from text only, make reasonable inferences but note assumptions.
-- ALWAYS return valid JSON only, no markdown formatting.`;
+  Rules:
+  - ${languageInstruction}
+  - Be warm, encouraging, and specific.
+  - Provide actionable, practical advice—not vague generalities.
+  - If working from a photo, reference what you actually see.
+  - If working from text only, make reasonable inferences but note assumptions.
+  - ALWAYS return valid JSON only, no markdown formatting.`;
 };
+
+export const ADVANCED_VISUAL_ANALYSIS_INSTRUCTION = `
+  CRITICAL: You must perform a topological analysis of the person in the photo.
+  Analyze from head to toe using the following Reference Scales:
+
+  1. Normalization:
+  - Use the white background or skin highlights to normalize lighting.
+  - Reference the Fitzpatrick Scale (Type I to VI) for skin tone.
+
+  2. Visual Component Decomposition:
+  - hair_style: { style, color }
+  - face_shape: { shape: enum(oval, round, square, heart, oblong, diamond), tone, fitzpatrick: enum(Type I-VI) }
+  - skin_tone: { brightness, undertone, fitzpatrick_scale }
+  - body_type: { type: enum(hourglass, inverted_triangle, rectangle, pear, apple, athletic), posture }
+  - apparel: { top: { category, color, fit }, bottom: { category, color, fit }, outer? }
+
+  3. Personal Color:
+  - Determine the season (Spring/Summer/Autumn/Winter) and subtype (Bright/Mute/Deep/etc.).
+
+  Output the analysis strictly following the provided JSON schema in the 'profile' field.
+  `;
 
 export const getImageAnalysisPrompt = (lang: string = "ko") => {
   return `${getSystemPromptBase(lang)}
 
-Analyze the provided photo carefully. Look at:
-1. Skin tone and undertone (warm/cool/neutral)
+  ${ADVANCED_VISUAL_ANALYSIS_INSTRUCTION}
+
+  Analyze the provided photo carefully. Look at:
+  ...
 2. Face shape and facial features
 3. Body proportions and type (if visible)
 4. Current clothing style (if visible)

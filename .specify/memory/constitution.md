@@ -1,12 +1,11 @@
 <!--
-Version change: 1.1.0 → 1.2.0
+Version change: 1.3.0 → 1.4.0
 Modified principles: 
-  - VIII. 사용자 경험 지속성 및 리텐션 (User Retention & Continuity) 추가
-  - IX. 커뮤니티 신뢰 및 소셜 상호작용 (Community Trust & Social Interaction) 추가
-Added sections: 리텐션 설계 (Retention Design), 커뮤니티 가이드라인 (Community Guidelines)
+  - XI. 프롬프트 엔지니어링 및 AI 응답 품질 (Prompt Engineering & AI Response Quality) 추가
+Added sections: AI 서비스 무결성 (AI Service Integrity)
 Templates updated: ✅ .specify/memory/constitution.md, ✅ .specify/templates/plan-template.md, ✅ .specify/templates/spec-template.md, ✅ .specify/templates/tasks-template.md
 Follow-up TODOs: 
-  - TODO(ENGAGEMENT_SYNC): 향후 커뮤니티 기능 구현 시 익명화 원칙 준수 확인
+  - TODO(PROMPT_VERSIONING): 프롬프트 변경 이력을 추적할 수 있는 별도의 관리 체계(GitHub Release 등) 검토
 -->
 
 # PersonaStyle Constitution
@@ -49,8 +48,16 @@ Follow-up TODOs:
 커뮤니티 피드와 공유 기능은 철저히 익명성을 기반으로 운영되어야 하며, 타인에게 영감을 주는 긍정적인 상호작용만을 장려하는 안전 장치를 포함해야 합니다.
 - **Rationale**: 심리 및 스타일 데이터의 민감성을 고려하여 안전한 소통 환경을 조성하고 네트워크 효과를 극대화하기 위함입니다.
 
+### X. 프리미엄 서비스 및 결제 무결성 (Premium Service & Payment Integrity)
+유료 결제 사용자의 기대를 충족하기 위해 전문가 수준의 PDF 리포트 품질을 보장해야 하며, 결제 프로세스(Portone 등)는 실시간 검증과 철저한 트랜잭션 관리를 통해 무결성을 유지해야 합니다.
+- **Rationale**: 유료 사용자와의 신뢰를 유지하고 재정적/기술적 리스크를 최소화하기 위함입니다.
+
+### XI. 프롬프트 엔지니어링 및 AI 응답 품질 (Prompt Engineering & AI Response Quality)
+AI 엔진(Gemini 1.5 Pro 등)의 프롬프트는 버전 관리되어야 하며, 모든 AI 응답은 정의된 스키마(Zod)를 엄격히 준수해야 합니다. 할루시네이션(환각) 방지를 위해 시스템 프롬프트에 명확한 제약 조건을 포함해야 합니다.
+- **Rationale**: 모델 업데이트나 프롬프트 변경에도 일관된 분석 결과와 서비스 품질을 보장하기 위함입니다.
+
 ## 기술 스택 정렬 (Tech Stack Alignment)
-본 프로젝트는 **Next.js 16**, **Supabase (SSR)**, **Tailwind CSS**, **TypeScript**를 기반으로 합니다.
+본 프로젝트는 **Next.js 16**, **Supabase (SSR)**, **Tailwind CSS**, **TypeScript**, **Portone (결제)**, **Gemini 1.5 Pro (AI)**를 기반으로 합니다.
 - 모든 기능은 서버 사이드 인증과 클라이언트 사이드 상태 관리의 조화를 최우선으로 고려하여 설계되어야 합니다.
 - 새로운 라이브러리 도입 시 반드시 기존 스택과의 호환성을 먼저 검증해야 합니다.
 
@@ -61,11 +68,13 @@ Follow-up TODOs:
 3. 시크릿(API Key 등)의 하드코딩 여부 전수 조사.
 4. 시각적 결과물의 해상도 및 로딩 성능 검증.
 5. 커뮤니티 공유 시 데이터 익명화 여부 전수 검증.
-6. 사용자 시나리오 기반의 최종 검증 보고서 작성.
+6. 결제 트랜잭션 무결성 및 PDF 리포트 가독성 검증.
+7. AI 응답 스키마 준수 및 프롬프트 버전 확인.
+8. 사용자 시나리오 기반의 최종 검증 보고서 작성.
 
 ## Governance
 헌장은 프로젝트의 모든 개발 관행에 우선하며, 모든 작업 계획은 헌장 준수 여부를 포함해야 합니다.
 - 헌장 수정은 문서화된 제안과 승인 절차를 거쳐야 하며, 수정 시 버전 번호를 갱신합니다.
 - `CONSTITUTION_VERSION`은 유의적 버전(MAJOR.MINOR.PATCH) 규칙을 따릅니다.
 
-**Version**: 1.2.0 | **Ratified**: 2026-03-24 | **Last Amended**: 2026-03-25
+**Version**: 1.4.0 | **Ratified**: 2026-03-24 | **Last Amended**: 2026-03-25

@@ -18,6 +18,9 @@ export const ko = {
     generateStyleImage: "스타일 이미지 생성하기",
     reset: "다시 분석하기",
     retryAnalysis: "다시 분석하기",
+    download: "다운로드",
+    share: "SNS 공유하기",
+    save: "저장하기",
   },
   header: {
     title: "PersonaStyle",
@@ -27,6 +30,7 @@ export const ko = {
       history: "기록",
       examples: "예시",
       about: "소개",
+      login: "로그인",
     },
   },
   hero: {
@@ -92,12 +96,15 @@ export const ko = {
     badges: {
       complete: "AI 분석 완료",
     },
+    premiumReport: "전문가 심층 리포트 보기",
     analysis: {
       title: "분석 결과",
+      visualProfile: "정밀 시각 분석 결과",
       colorSeason: "퍼스널 컬러",
       bodyType: "체형 분석",
       faceShape: "얼굴형",
       personalityVibe: "퍼스널리티 바이브",
+      confidence: "AI 분석 신뢰도",
     },
     fashion: {
       title: "패션 추천",
@@ -131,6 +138,17 @@ export const ko = {
       generating: "AI가 이미지를 생성하고 있습니다...",
       regenerate: "다시 생성하기",
     },
+    shop: {
+      title: "추천 스타일 쇼핑하기",
+      itemSuggestion: "{title}에 어울리는 아이템",
+      desc: "AI가 분석한 퍼스널 컬러 {color}와 {body} 체형을 돋보이게 해줄 베스트 아이템들을 선별했습니다.",
+      button: "맞춤 아이템 보기",
+    },
+    historySuggestion: {
+      title: "분석 결과를 저장하고 싶으신가요?",
+      desc: "로그인하시면 지금까지의 모든 스타일 분석 기록을 언제 어디서나 다시 확인하실 수 있습니다. 나만의 스타일 변천사를 기록해보세요.",
+      button: "무료로 시작하고 결과 저장하기",
+    },
   },
   history: {
     title: "분석 기록",
@@ -154,6 +172,23 @@ export const ko = {
     title: "스타일 분석 예시",
     description: "다양한 퍼스널 컬러와 스타일에 따른 AI 분석 결과를 미리 확인해보세요. 각 스타일에 맞는 패션, 뷰티 추천을 자세히 살펴볼 수 있습니다.",
     button: "나도 무료로 분석 받기",
+  },
+  feed: {
+    badge: "Community",
+    title: "Style Feed",
+    description: "다른 사람들은 어떤 스타일 페르소나를 가지고 있을까요? 다양한 분석 결과를 구경하고 새로운 영감을 얻어보세요.",
+    share: "내 스타일 공유하기",
+    follow: "팔로우",
+    stats: {
+      likes: "좋아요",
+      comments: "댓글",
+    },
+  },
+  trend: {
+    title: "Persona Trends",
+    description: "실시간으로 분석되는 인기 페르소나 순위",
+    rank: "순위",
+    count: "{count}명 분석",
   },
 };
 

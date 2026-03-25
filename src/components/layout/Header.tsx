@@ -21,79 +21,81 @@ export function Header() {
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-16 max-w-screen-2xl items-center justify-between px-4 mx-auto">
+    <header className="fixed top-0 z-50 w-full border-b border-foreground/[0.03] bg-background/80 backdrop-blur-xl transition-all duration-300">
+      <div className="container flex h-20 items-center justify-between px-4 mx-auto">
         <div className="flex items-center gap-2">
-          <Link href="/" className="flex items-center space-x-2">
-            <span className="font-display text-xl font-bold tracking-tight text-primary">
-              PersonaStyle
+          <Link href="/" className="flex items-center group">
+            <span className="font-display text-2xl font-bold tracking-tighter text-primary group-hover:text-accent transition-colors">
+              Persona<span className="text-luxury font-medium ml-0.5">Style</span>
             </span>
           </Link>
         </div>
 
-        <nav className="flex items-center gap-2 md:gap-4">
-          <div className="hidden md:flex items-center gap-4 mr-2">
+        <nav className="flex items-center gap-3 md:gap-6">
+          <div className="hidden lg:flex items-center gap-8 mr-4">
             <Link
               href="/feed"
-              className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+              className="text-[11px] uppercase tracking-[0.2em] font-bold text-muted-foreground transition-all hover:text-primary hover:tracking-[0.25em]"
             >
               Style Feed
             </Link>
             <Link
               href="/history"
-              className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground flex items-center gap-1.5"
+              className="text-[11px] uppercase tracking-[0.2em] font-bold text-muted-foreground transition-all hover:text-primary hover:tracking-[0.25em]"
             >
-              <History className="h-4 w-4" />
               {t("header.menu.history")}
             </Link>
             <Link
               href="/examples"
-              className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+              className="text-[11px] uppercase tracking-[0.2em] font-bold text-muted-foreground transition-all hover:text-primary hover:tracking-[0.25em]"
             >
               {t("header.menu.examples")}
             </Link>
           </div>
 
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={toggleLanguage}
-            className="w-12 px-0 gap-1 md:w-16"
-          >
-            <Globe className="h-4 w-4" />
-            <span className="text-[10px] font-bold uppercase md:text-xs">
-              {language === "ko" ? "EN" : "KR"}
-            </span>
-          </Button>
-
-          {user ? (
-            <div className="flex items-center gap-2 border-l pl-2 md:pl-4">
-              <Link href="/history" className="flex items-center gap-2 hover:bg-muted p-1.5 rounded-full transition-colors">
-                <div className="h-7 w-7 rounded-full bg-primary/10 flex items-center justify-center border border-primary/20">
-                  <User className="h-4 w-4 text-primary" />
-                </div>
-                <span className="text-xs font-medium hidden lg:block max-w-[100px] truncate">{user.email}</span>
-              </Link>
-              <Button variant="ghost" size="icon" onClick={handleLogout} className="h-8 w-8 text-muted-foreground hover:text-destructive transition-colors">
-                <LogOut className="h-4 w-4" />
-              </Button>
-            </div>
-          ) : (
+          <div className="flex items-center gap-2">
             <Button
-              size="sm"
               variant="ghost"
-              asChild
-              className="hidden sm:inline-flex text-xs font-bold"
+              size="sm"
+              onClick={toggleLanguage}
+              className="h-9 w-12 px-0 rounded-full hover:bg-white/50 border border-transparent hover:border-foreground/5 transition-all"
             >
-              <Link href="/login">로그인</Link>
+              <Globe className="h-4 w-4 mr-1 opacity-60" />
+              <span className="text-[10px] font-bold uppercase">
+                {language === "ko" ? "EN" : "KR"}
+              </span>
             </Button>
-          )}
 
-          <Button size="sm" asChild className="rounded-full px-4 h-9 shadow-sm ml-1">
-            <Link href="/analyze">{t("common.startAnalysis")}</Link>
-          </Button>
+            {user ? (
+              <div className="flex items-center gap-2 border-l border-foreground/5 pl-2 md:pl-4">
+                <Link href="/history" className="flex items-center gap-2 hover:bg-white/50 p-1 rounded-full transition-all group">
+                  <div className="h-8 w-8 rounded-full bg-primary/5 flex items-center justify-center border border-primary/10 group-hover:bg-primary group-hover:text-white transition-all">
+                    <User className="h-4 w-4" />
+                  </div>
+                </Link>
+                <Button variant="ghost" size="icon" onClick={handleLogout} className="h-8 w-8 rounded-full text-muted-foreground hover:text-destructive hover:bg-destructive/5 transition-all">
+                  <LogOut className="h-4 w-4" />
+                </Button>
+              </div>
+            ) : (
+              <Button
+                size="sm"
+                variant="ghost"
+                asChild
+                className="hidden sm:inline-flex text-[11px] font-bold uppercase tracking-wider h-9 rounded-full"
+              >
+                <Link href="/login">{t("header.menu.login") || "Login"}</Link>
+              </Button>
+            )}
+
+
+            <Button size="sm" asChild className="rounded-full px-6 h-9 shadow-lg shadow-primary/10 hover:shadow-primary/20 transition-all hover:-translate-y-0.5 ml-1 text-xs font-bold uppercase tracking-tight">
+              <Link href="/analyze">{t("common.startAnalysis")}</Link>
+            </Button>
+          </div>
         </nav>
       </div>
     </header>
   );
 }
+

@@ -28,6 +28,15 @@ export function getGeminiModel(modelName: string = "gemini-2.5-flash-image") {
   return genAI.getGenerativeModel({ model: modelName });
 }
 
+export function getGeminiModelJson(
+  modelName: string = "gemini-2.5-flash-image",
+) {
+  return genAI.getGenerativeModel({
+    model: modelName,
+    generationConfig: { responseMimeType: "application/json" },
+  });
+}
+
 export async function generateMatchingSummary(
   sourceType?: string,
   targetType?: string,

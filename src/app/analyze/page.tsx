@@ -6,14 +6,7 @@ import { UploadForm } from "@/components/features/UploadForm";
 import { TextInput } from "@/components/features/TextInput";
 import { AnalysisResultDisplay } from "@/components/features/AnalysisResult";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { FormattedText } from "@/components/ui/formatted-text";
+import { cn } from "@/lib/utils";
 import { Sparkles, Loader2, Camera, PenLine } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { AnalysisResult } from "@/lib/types";
@@ -56,7 +49,10 @@ export default function AnalyzePage() {
 
   const handleAnalyze = async () => {
     if (!imageBase64 && !text) {
-      toast.error(t("analyze.error.noInput") || "사진을 업로드하거나 자기소개를 입력해주세요.");
+      toast.error(
+        t("analyze.error.noInput") ||
+          "사진을 업로드하거나 자기소개를 입력해주세요.",
+      );
       return;
     }
 
@@ -65,7 +61,7 @@ export default function AnalyzePage() {
 
     try {
       // Short delay to show uploading state
-      await new Promise(resolve => setTimeout(resolve, 800));
+      await new Promise((resolve) => setTimeout(resolve, 800));
 
       setLoadingStep("analyzing");
       const response = await fetch("/api/analyze", {
@@ -86,19 +82,19 @@ export default function AnalyzePage() {
 
       setLoadingStep("generating");
       // Simulate finishing step
-      await new Promise(resolve => setTimeout(resolve, 800));
+      await new Promise((resolve) => setTimeout(resolve, 800));
 
       setResult(data.result);
 
       // Save to history
-      const inputType = imageBase64 && text ? "combined" : imageBase64 ? "photo" : "text";
+      const inputType =
+        imageBase64 && text ? "combined" : imageBase64 ? "photo" : "text";
       if (typeof window !== "undefined") {
         const { saveAnalysisToHistory } = await import("@/lib/history");
         saveAnalysisToHistory(data.result, inputType);
       }
     } catch (err: unknown) {
-      const message =
-        err instanceof Error ? err.message : t("common.error");
+      const message = err instanceof Error ? err.message : t("common.error");
       toast.error(message);
     } finally {
       setIsAnalyzing(false);
@@ -115,9 +111,9 @@ export default function AnalyzePage() {
 
   if (result) {
     return (
-      <div className="flex min-h-screen flex-col bg-muted/30">
+      <div className="flex min-h-screen flex-col bg-[#fcfcfc]">
         <Header />
-        <main className="container flex-1 py-12 px-4 md:px-6">
+        <main className="container flex-1 pt-32 pb-20 px-4 md:px-6">
           <AnalysisResultDisplay result={result} onReset={handleReset} />
         </main>
       </div>
@@ -125,127 +121,148 @@ export default function AnalyzePage() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-muted/30">
+    <div className="flex min-h-screen flex-col bg-[#fcfcfc]">
       <Header />
-      <main className="container flex-1 py-12 px-4 md:px-6">
+      <main className="container flex-1 pt-32 pb-20 px-4 md:px-6">
         <motion.div
-          initial={{ opacity: 0, y: 10 }}
+          initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="mx-auto max-w-4xl space-y-8"
+          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+          className="mx-auto max-w-5xl space-y-12"
         >
-          {/* Title */}
-          <div className="text-center space-y-2">
-            <h1 className="text-3xl font-display font-bold tracking-tight md:text-4xl">
+          {/* Title Area */}
+          <div className="text-center space-y-4">
+            <div className="inline-block px-3 py-1 rounded-full border border-primary/5 bg-primary/[0.02] text-[10px] uppercase tracking-[0.2em] font-bold text-primary/40 mb-2">
+              Step 01. Personal Data
+            </div>
+            <h1 className="text-4xl md:text-6xl font-display font-semibold tracking-tight text-primary">
               {t("analyze.title")}
             </h1>
-            <FormattedText
-              text={t("analyze.description")}
-              className="text-muted-foreground max-w-[600px] mx-auto"
-            />
+            <p className="text-muted-foreground max-w-[600px] mx-auto font-light leading-relaxed">
+              {t("analyze.description")}
+            </p>
           </div>
 
-          {/* Mode Selector */}
-          <div className="flex justify-center gap-3">
-            <Button
-              variant={mode === "photo" ? "default" : "outline"}
+          {/* Mode Selector - Premium Style */}
+          <div className="flex justify-center p-1.5 bg-foreground/[0.03] rounded-full max-w-sm mx-auto border border-foreground/[0.05]">
+            <button
               onClick={() => setMode("photo")}
-              className="rounded-full"
+              className={cn(
+                "flex-1 flex items-center justify-center gap-2 py-2.5 px-6 rounded-full text-xs font-bold uppercase tracking-wider transition-all",
+                mode === "photo"
+                  ? "bg-white text-primary shadow-sm"
+                  : "text-muted-foreground hover:text-primary",
+              )}
             >
-              <Camera className="mr-2 h-4 w-4" />
+              <Camera className="h-3.5 w-3.5" />
               {t("analyze.tabs.photo")}
-            </Button>
-            <Button
-              variant={mode === "text" ? "default" : "outline"}
+            </button>
+            <button
               onClick={() => setMode("text")}
-              className="rounded-full"
+              className={cn(
+                "flex-1 flex items-center justify-center gap-2 py-2.5 px-6 rounded-full text-xs font-bold uppercase tracking-wider transition-all",
+                mode === "text"
+                  ? "bg-white text-primary shadow-sm"
+                  : "text-muted-foreground hover:text-primary",
+              )}
             >
-              <PenLine className="mr-2 h-4 w-4" />
+              <PenLine className="h-3.5 w-3.5" />
               {t("analyze.tabs.text")}
-            </Button>
+            </button>
           </div>
 
-          {/* Input Area */}
+          {/* Input Area with Glass Effect */}
           <AnimatePresence mode="wait">
             <motion.div
               key={mode}
-              initial={{ opacity: 0, x: mode === "photo" ? -20 : 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: mode === "photo" ? 20 : -20 }}
-              transition={{ duration: 0.3 }}
-              className="grid gap-6 md:grid-cols-2"
+              initial={{ opacity: 0, scale: 0.98 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 1.02 }}
+              transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+              className="grid gap-8 md:grid-cols-2 items-stretch"
             >
               {mode === "photo" ? (
                 <>
-                  <Card className="border-muted bg-background/50 backdrop-blur-sm">
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <Camera className="h-5 w-5 text-primary" />
+                  <div className="glass-card rounded-2xl p-8 flex flex-col space-y-6">
+                    <div className="flex items-center gap-3">
+                      <div className="h-10 w-10 rounded-full bg-primary/5 flex items-center justify-center text-primary border border-primary/10">
+                        <Camera className="h-5 w-5" />
+                      </div>
+                      <h2 className="font-display text-2xl font-bold">
                         {t("analyze.tabs.photo")}
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <UploadForm onImageSelect={handleImageSelect} />
-                    </CardContent>
-                  </Card>
-                  <Card className="border-muted bg-background/50 backdrop-blur-sm">
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <PenLine className="h-5 w-5 text-primary" />
+                      </h2>
+                    </div>
+                    <UploadForm onImageSelect={handleImageSelect} />
+                  </div>
+
+                  <div className="glass-card rounded-2xl p-8 flex flex-col space-y-6">
+                    <div className="flex items-center gap-3">
+                      <div className="h-10 w-10 rounded-full bg-primary/5 flex items-center justify-center text-primary border border-primary/10">
+                        <PenLine className="h-5 w-5" />
+                      </div>
+                      <h2 className="font-display text-2xl font-bold">
                         {t("analyze.tabs.text")}
-                      </CardTitle>
-                      <CardDescription>
-                        {t("analyze.textInput.label")}
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <TextInput onTextChange={setText} value={text} />
-                    </CardContent>
-                  </Card>
+                      </h2>
+                    </div>
+                    <p className="text-sm text-muted-foreground font-light">
+                      {t("analyze.textInput.label")}
+                    </p>
+                    <TextInput
+                      onTextChange={setText}
+                      value={text}
+                      className="flex-1 min-h-[200px]"
+                    />
+                  </div>
                 </>
               ) : (
-                <Card className="border-muted bg-background/50 backdrop-blur-sm md:col-span-2">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <PenLine className="h-5 w-5 text-primary" />
+                <div className="glass-card rounded-2xl p-8 md:col-span-2 space-y-6">
+                  <div className="flex items-center gap-3">
+                    <div className="h-10 w-10 rounded-full bg-primary/5 flex items-center justify-center text-primary border border-primary/10">
+                      <PenLine className="h-5 w-5" />
+                    </div>
+                    <h2 className="font-display text-2xl font-bold">
                       {t("analyze.tabs.text")}
-                    </CardTitle>
-                    <CardDescription>
-                      {t("analyze.textInput.label")}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <TextInput onTextChange={setText} value={text} />
-                  </CardContent>
-                </Card>
+                    </h2>
+                  </div>
+                  <p className="text-sm text-muted-foreground font-light">
+                    {t("analyze.textInput.label")}
+                  </p>
+                  <TextInput
+                    onTextChange={setText}
+                    value={text}
+                    className="min-h-[300px]"
+                  />
+                </div>
               )}
             </motion.div>
           </AnimatePresence>
 
-
-
-          {/* Submit */}
-          <div className="flex justify-center pt-4">
+          {/* Submit Button - Enhanced */}
+          <div className="flex justify-center pt-8">
             <Button
               size="lg"
-              className="w-full md:w-auto min-w-[200px] text-lg h-12 rounded-full shadow-lg hover:shadow-xl transition-all hover:-translate-y-0.5"
+              className="group relative overflow-hidden w-full md:w-auto min-w-[280px] h-16 rounded-full text-lg font-bold uppercase tracking-widest transition-all hover:-translate-y-1 hover:shadow-2xl hover:shadow-primary/20 active:scale-95 disabled:opacity-50"
               onClick={handleAnalyze}
               disabled={
-                isAnalyzing ||
-                (mode === "photo" ? !imageBase64 : !text)
+                isAnalyzing || (mode === "photo" ? !imageBase64 : !text)
               }
             >
               {isAnalyzing ? (
-                <>
-                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                  {t(`analyze.loading.${loadingStep}`) || t("common.analyzing")}
-                </>
+                <div className="flex items-center gap-3">
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                  <span className="text-sm">
+                    {t(`analyze.loading.${loadingStep}`) ||
+                      t("common.analyzing")}
+                  </span>
+                </div>
               ) : (
-                <>
-                  <Sparkles className="mr-2 h-5 w-5" />
-                  {t("analyze.button")}
-                </>
+                <div className="flex items-center gap-3">
+                  <Sparkles className="h-5 w-5 transition-transform group-hover:rotate-12" />
+                  <span>{t("analyze.button")}</span>
+                </div>
               )}
+              {/* Shine effect */}
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
             </Button>
           </div>
         </motion.div>

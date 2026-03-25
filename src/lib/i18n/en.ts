@@ -20,6 +20,9 @@ export const en: Translations = {
     generateStyleImage: "Generate Style Image",
     reset: "Analyze Again",
     retryAnalysis: "Analyze Again",
+    download: "Download",
+    share: "Share",
+    save: "Save",
   },
   header: {
     title: "PersonaStyle",
@@ -29,6 +32,7 @@ export const en: Translations = {
       history: "History",
       examples: "Examples",
       about: "About",
+      login: "Login",
     },
   },
   hero: {
@@ -94,12 +98,15 @@ export const en: Translations = {
     badges: {
       complete: "AI Analysis Complete",
     },
+    premiumReport: "View Premium Deep Report",
     analysis: {
       title: "Analysis Results",
+      visualProfile: "Precision Visual Profile",
       colorSeason: "Color Season",
       bodyType: "Body Type",
       faceShape: "Face Shape",
       personalityVibe: "Personality Vibe",
+      confidence: "AI Confidence",
     },
     fashion: {
       title: "Fashion Recommendations",
@@ -133,6 +140,17 @@ export const en: Translations = {
       generating: "AI is generating the image...",
       regenerate: "Regenerate Image",
     },
+    shop: {
+      title: "Shop Recommended Style",
+      itemSuggestion: "Items matching {title}",
+      desc: "Selected best items to highlight your {color} season and {body} body type.",
+      button: "View Matches",
+    },
+    historySuggestion: {
+      title: "Want to save your results?",
+      desc: "Sign in to keep track of all your style analysis history and access it anytime, anywhere.",
+      button: "Sign in & Save Results",
+    },
   },
   history: {
     title: "Analysis History",
@@ -156,5 +174,22 @@ export const en: Translations = {
     title: "Style Analysis Examples",
     description: "Check out AI analysis results for various color seasons and styles. Explore detailed fashion and beauty recommendations for each style.",
     button: "Get Your Free Analysis",
+  },
+  feed: {
+    badge: "Community",
+    title: "Style Feed",
+    description: "Discover the style personas of others. Explore various analysis results and find new inspiration.",
+    share: "Share My Style",
+    follow: "Follow",
+    stats: {
+      likes: "Likes",
+      comments: "Comments",
+    },
+  },
+  trend: {
+    title: "Persona Trends",
+    description: "Real-time rankings of popular personas",
+    rank: "Rank",
+    count: "{count} analyzed",
   },
 };
