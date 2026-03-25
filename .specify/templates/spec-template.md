@@ -87,6 +87,7 @@
 - **FR-SEC-001**: System MUST validate all user inputs at the API boundary using Zod or equivalent.
 - **FR-SEC-002**: Database access MUST strictly follow Supabase RLS policies to ensure data isolation.
 - **FR-SEC-003**: All shared or aggregated trend data MUST be anonymized before exposure.
+- **FR-PAY-001**: Payment transactions MUST be verified server-side with the payment provider (Portone, etc.) before fulfilling the order.
 - **FR-VIS-001**: Visual artifacts MUST be generated within 3 seconds and maintain high-resolution quality.
 - **FR-RET-001**: System MUST provide a chronological view of user persona evolution over time.
 - **FR-COM-001**: Community shared data MUST be strictly anonymized and pass safety guidelines.

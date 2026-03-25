@@ -24,7 +24,8 @@ export default function HistoryPage() {
   const { user, isLoading: authLoading } = useAuth();
   const router = useRouter();
   const [history, setHistory] = React.useState<AnalysisHistoryItem[]>([]);
-  const [selectedItem, setSelectedItem] = React.useState<AnalysisHistoryItem | null>(null);
+  const [selectedItem, setSelectedItem] =
+    React.useState<AnalysisHistoryItem | null>(null);
   const [isDataLoading, setIsDataLoading] = React.useState(true);
 
   React.useEffect(() => {
@@ -51,7 +52,11 @@ export default function HistoryPage() {
   };
 
   const handleClearAll = () => {
-    if (confirm("모든 분석 기록을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.")) {
+    if (
+      confirm(
+        "모든 분석 기록을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.",
+      )
+    ) {
       clearAllHistory();
       setHistory([]);
       setSelectedItem(null);
@@ -78,7 +83,11 @@ export default function HistoryPage() {
   const handleSelectItem = (item: AnalysisHistoryItem) => {
     setSelectedItem(item);
     // Push a new history entry so browser back button returns to the list
-    window.history.pushState({ viewing: item.id }, "", `/history?id=${item.id}`);
+    window.history.pushState(
+      { viewing: item.id },
+      "",
+      `/history?id=${item.id}`,
+    );
   };
 
   const handleBackToList = React.useCallback(() => {
@@ -148,15 +157,21 @@ export default function HistoryPage() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-muted/30">
+    <div className="flex min-h-screen pt-20 flex-col bg-muted/30">
       <Header />
       <main className="container flex-1 py-12 px-4 md:px-6">
         {!user && (
           <div className="mb-8 p-4 bg-primary/5 border border-primary/10 rounded-xl flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="text-sm text-muted-foreground text-center sm:text-left">
-              <span className="font-semibold text-primary">로그인</span>하시면 분석 결과를 클라우드에 영구적으로 보관하고 어디서든 확인할 수 있습니다.
+              <span className="font-semibold text-primary">로그인</span>하시면
+              분석 결과를 클라우드에 영구적으로 보관하고 어디서든 확인할 수
+              있습니다.
             </div>
-            <Button size="sm" onClick={() => router.push("/login")} className="rounded-full shrink-0">
+            <Button
+              size="sm"
+              onClick={() => router.push("/login")}
+              className="rounded-full shrink-0"
+            >
               지금 로그인하기
             </Button>
           </div>

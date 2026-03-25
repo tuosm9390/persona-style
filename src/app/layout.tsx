@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, Outfit } from "next/font/google";
+import { Cormorant, Montserrat } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 import { LanguageProvider } from "@/contexts/LanguageContext";
@@ -7,12 +7,12 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { Toaster } from "@/components/ui/sonner";
 import Script from "next/script";
 
-const inter = Inter({
+const montserrat = Montserrat({
   variable: "--font-sans",
   subsets: ["latin"],
 });
 
-const outfit = Outfit({
+const cormorant = Cormorant({
   variable: "--font-display",
   subsets: ["latin"],
 });
@@ -63,8 +63,8 @@ export default function RootLayout({
       <body
         className={cn(
           "min-h-screen bg-background font-sans antialiased break-keep",
-          inter.variable,
-          outfit.variable
+          montserrat.variable,
+          cormorant.variable
         )}
       >
         <AuthProvider>

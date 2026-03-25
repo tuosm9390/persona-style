@@ -1,5 +1,60 @@
+export enum FitzpatrickScale {
+  Type1 = "Type I",
+  Type2 = "Type II",
+  Type3 = "Type III",
+  Type4 = "Type IV",
+  Type5 = "Type V",
+  Type6 = "Type VI",
+}
+
+export enum FaceShape {
+  Oval = "oval",
+  Round = "round",
+  Square = "square",
+  Heart = "heart",
+  Oblong = "oblong",
+  Diamond = "diamond",
+}
+
+export enum BodyType {
+  Hourglass = "hourglass",
+  InvertedTriangle = "inverted_triangle",
+  Rectangle = "rectangle",
+  Pear = "pear",
+  Apple = "apple",
+  Athletic = "athletic",
+}
+
+export interface VisualAnalysisProfile {
+  hair: {
+    style: string;
+    color: string;
+  };
+  face: {
+    shape: FaceShape;
+    tone: string;
+    fitzpatrick: FitzpatrickScale;
+  };
+  body: {
+    type: BodyType;
+    posture: string;
+  };
+  apparel: {
+    top: { category: string; color: string; fit: string };
+    bottom: { category: string; color: string; fit: string };
+    outer?: { category: string; color: string; fit: string };
+  };
+  personalColor: string;
+  metadata: {
+    anonymized: boolean;
+    version: string;
+    confidence: number;
+  };
+}
+
 export interface AnalysisResult {
   id?: string;
+  profile?: VisualAnalysisProfile;
   summary: {
     title: string;
     keywords: string[];

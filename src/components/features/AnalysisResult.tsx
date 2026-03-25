@@ -1,7 +1,6 @@
 "use client";
 
 import * as React from "react";
-import Image from "next/image";
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -29,15 +28,15 @@ import {
   Footprints,
   Spline,
   PanelTop,
+  Download,
+  Share2,
 } from "lucide-react";
 import type { AnalysisResult } from "@/lib/types";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { FormattedText } from "@/components/ui/formatted-text";
-import { toPng } from "html-to-image";
 import { ShareCard } from "./ShareCard";
 import { toast } from "sonner";
-import { Download, Share2 } from "lucide-react";
-import router from "next/router";
+import { useRouter } from "next/navigation";
 
 interface AnalysisResultDisplayProps {
   result: AnalysisResult;
@@ -62,11 +61,9 @@ function ColorChip({ color }: { color: string }) {
   );
 }
 
-// Helper function to convert color names to CSS colors
 function getColorValue(colorName: string): string {
   const normalizedColorName = colorName.toLowerCase();
   const colorMap: Record<string, string> = {
-    // Neutrals
     화이트: "#FFFFFF",
     white: "#FFFFFF",
     아이보리: "#FFFFF0",
@@ -75,15 +72,12 @@ function getColorValue(colorName: string): string {
     beige: "#F5F5DC",
     그레이: "#808080",
     gray: "#808080",
-    grey: "#808080",
     차콜: "#36454F",
     charcoal: "#36454F",
     블랙: "#000000",
     black: "#000000",
     네이비: "#000080",
     navy: "#000080",
-
-    // Warm colors
     레드: "#DC143C",
     red: "#DC143C",
     코랄: "#FF7F50",
@@ -94,60 +88,26 @@ function getColorValue(colorName: string): string {
     orange: "#FF8C00",
     옐로우: "#FFD700",
     yellow: "#FFD700",
-    골드: "#FFD700",
-    gold: "#FFD700",
     브라운: "#8B4513",
     brown: "#8B4513",
-    카키: "#C3B091",
-    khaki: "#C3B091",
-    머스타드: "#FFDB58",
-    mustard: "#FFDB58",
-
-    // Cool colors
     블루: "#4169E1",
     blue: "#4169E1",
-    스카이블루: "#87CEEB",
-    skyblue: "#87CEEB",
-    "sky blue": "#87CEEB",
-    민트: "#98FF98",
-    mint: "#98FF98",
     그린: "#228B22",
     green: "#228B22",
-    올리브: "#808000",
-    olive: "#808000",
     퍼플: "#9370DB",
     purple: "#9370DB",
-    라벤더: "#E6E6FA",
-    lavender: "#E6E6FA",
     핑크: "#FFC0CB",
     pink: "#FFC0CB",
-    로즈: "#FF007F",
-    rose: "#FF007F",
-    버건디: "#800020",
-    burgundy: "#800020",
-    와인: "#722F37",
-    wine: "#722F37",
-    플럼: "#8E4585",
-    plum: "#8E4585",
-    실버: "#C0C0C0",
-    silver: "#C0C0C0",
   };
 
-  // Try to find exact match first
   for (const [key, value] of Object.entries(colorMap)) {
-    if (normalizedColorName.includes(key)) {
-      return value;
-    }
+    if (normalizedColorName.includes(key)) return value;
   }
-
-  // Default to a gradient if no match
   return "linear-gradient(135deg, #667eea 0%, #764ba2 100%)";
 }
 
-// Helper function to get icon for analysis types
 function getIconForType(type: string, value: string) {
   const normalizedValue = value.toLowerCase();
-
   switch (type) {
     case "faceShape":
       if (normalizedValue.includes("round") || normalizedValue.includes("둥근"))
@@ -170,7 +130,6 @@ function getIconForType(type: string, value: string) {
       )
         return <Diamond className="h-5 w-5" />;
       return <User className="h-5 w-5" />;
-
     case "bodyType":
       if (
         normalizedValue.includes("hourglass") ||
@@ -182,20 +141,7 @@ function getIconForType(type: string, value: string) {
         normalizedValue.includes("직사각형")
       )
         return <RectangleHorizontal className="h-5 w-5" />;
-      if (
-        normalizedValue.includes("triangle") ||
-        normalizedValue.includes("삼각형")
-      )
-        return <Triangle className="h-5 w-5" />;
-      if (
-        normalizedValue.includes("inverted") ||
-        normalizedValue.includes("역삼각형")
-      )
-        return <Triangle className="h-5 w-5 rotate-180" />;
-      if (normalizedValue.includes("round") || normalizedValue.includes("원형"))
-        return <Circle className="h-5 w-5" />;
       return <User className="h-5 w-5" />;
-
     case "colorSeason":
       if (normalizedValue.includes("spring") || normalizedValue.includes("봄"))
         return <Cloud className="h-5 w-5 text-green-400" />;
@@ -206,7 +152,6 @@ function getIconForType(type: string, value: string) {
         return <Sun className="h-5 w-5 text-yellow-400" />;
       if (
         normalizedValue.includes("autumn") ||
-        normalizedValue.includes("fall") ||
         normalizedValue.includes("가을")
       )
         return <Wind className="h-5 w-5 text-orange-400" />;
@@ -216,21 +161,19 @@ function getIconForType(type: string, value: string) {
       )
         return <Moon className="h-5 w-5 text-blue-400" />;
       return <Palette className="h-5 w-5" />;
-
     default:
       return <Sparkles className="h-5 w-5" />;
   }
 }
 
-// Helper function to get icon for fashion items
 function getFashionIcon(type: string) {
   switch (type) {
     case "tops":
       return <Shirt className="h-5 w-5" />;
     case "bottoms":
-      return <Spline className="h-5 w-5" />; // Spline for fit/curves/pants silhouette
+      return <Spline className="h-5 w-5" />;
     case "outerwear":
-      return <PanelTop className="h-5 w-5" />; // PanelTop looks like covering/coat
+      return <PanelTop className="h-5 w-5" />;
     case "shoes":
       return <Footprints className="h-5 w-5" />;
     case "accessories":
@@ -240,121 +183,13 @@ function getFashionIcon(type: string) {
   }
 }
 
-// StyleImageSection component
-// function StyleImageSection({ result }: { result: AnalysisResult }) {
-//   const { t } = useLanguage();
-//   const [isGenerating, setIsGenerating] = React.useState(false);
-//   const [imageUrl, setImageUrl] = React.useState<string | null>(null);
-//   const [error, setError] = React.useState<string | null>(null);
-
-//   const handleGenerateImage = async () => {
-//     setIsGenerating(true);
-//     setError(null);
-
-//     try {
-//       const response = await fetch("/api/generate-image", {
-//         method: "POST",
-//         headers: { "Content-Type": "application/json" },
-//         body: JSON.stringify({ result }),
-//       });
-
-//       const data = await response.json();
-
-//       if (!response.ok) {
-//         throw new Error(data.error || "이미지 생성에 실패했습니다.");
-//       }
-
-//       // Convert base64 image data to data URL for img tag rendering
-//       if (data.imageData) {
-//         const mimeType = data.mimeType || "image/png";
-//         setImageUrl(`data:${mimeType};base64,${data.imageData}`);
-//       }
-//     } catch (err: any) {
-//       setError(err.message || "이미지 생성 중 오류가 발생했습니다.");
-//     } finally {
-//       setIsGenerating(false);
-//     }
-//   };
-
-//   return (
-//     <motion.div
-//       custom={4}
-//       variants={sectionVariants}
-//       initial="hidden"
-//       animate="visible"
-//     >
-//       <Card className="border-primary/20">
-//         <CardHeader>
-//           <CardTitle className="flex items-center gap-2 text-lg">
-//             <Sparkles className="h-5 w-5 text-primary" />
-//             {t("result.image.title")}
-//           </CardTitle>
-//         </CardHeader>
-//         <CardContent className="space-y-4">
-//           {!imageUrl && !isGenerating && (
-//             <div className="text-center py-8">
-//               <p className="text-sm text-muted-foreground mb-4">
-//                 {t("result.image.description")}
-//               </p>
-//               <Button
-//                 onClick={handleGenerateImage}
-//                 className="rounded-full"
-//                 size="lg"
-//               >
-//                 <Sparkles className="mr-2 h-4 w-4" />
-//                 {t("result.image.generate")}
-//               </Button>
-//             </div>
-//           )}
-
-//           {isGenerating && (
-//             <div className="flex flex-col items-center justify-center py-12 space-y-4">
-//               <div className="animate-spin rounded-full h-12 w-12 border-4 border-primary border-t-transparent" />
-//               <p className="text-sm text-muted-foreground">
-//                 {t("result.image.generating")}
-//               </p>
-//             </div>
-//           )}
-
-//           {imageUrl && (
-//             <div className="space-y-4">
-//               <div className="relative rounded-lg overflow-hidden border aspect-[3/4]">
-//                 <Image
-//                   src={imageUrl}
-//                   alt="AI Generated Style"
-//                   fill
-//                   className="object-cover"
-//                   sizes="(max-width: 768px) 100vw, 500px"
-//                 />
-//               </div>
-//               <Button
-//                 variant="outline"
-//                 onClick={handleGenerateImage}
-//                 className="w-full"
-//                 disabled={isGenerating}
-//               >
-//                 {t("result.image.regenerate")}
-//               </Button>
-//             </div>
-//           )}
-
-//           {error && (
-//             <div className="rounded-lg bg-red-50 border border-red-200 p-4 text-center">
-//               <p className="text-sm text-red-800">{error}</p>
-//             </div>
-//           )}
-//         </CardContent>
-//       </Card>
-//     </motion.div>
-//   );
-// }
-
 export function AnalysisResultDisplay({
   result,
   onReset,
   resetLabel,
 }: AnalysisResultDisplayProps) {
   const { t } = useLanguage();
+  const router = useRouter();
   const actualResetLabel = resetLabel || t("common.retryAnalysis");
   const cardRef = React.useRef<HTMLDivElement>(null);
   const [isDownloading, setIsDownloading] = React.useState(false);
@@ -362,19 +197,17 @@ export function AnalysisResultDisplay({
   const handleDownload = async () => {
     const analysisId = (result as any).id;
     if (!analysisId) {
-      toast.error("저장된 분석 결과가 아닙니다. 먼저 결과를 저장해 주세요.");
+      toast.error(t("common.error"));
       return;
     }
-
     setIsDownloading(true);
     try {
       const link = document.createElement("a");
       link.href = `/api/share/${analysisId}`;
       link.download = `persona-style-${analysisId}.png`;
       link.click();
-      toast.success("이미지 다운로드를 시작합니다.");
     } catch (err) {
-      toast.error("이미지 생성 중 오류가 발생했습니다.");
+      toast.error(t("common.error"));
     } finally {
       setIsDownloading(false);
     }
@@ -382,39 +215,30 @@ export function AnalysisResultDisplay({
 
   const handleShare = async () => {
     const analysisId = (result as any).id;
-    if (!analysisId) {
-      toast.error("저장된 분석 결과가 아닙니다.");
-      return;
-    }
-
+    if (!analysisId) return;
     const shareUrl = `${window.location.origin}/analyze/${analysisId}`;
-
     if (navigator.share) {
       try {
         await navigator.share({
           title: "My Persona Style",
-          text: `나의 스타일 페르소나는 '${result.summary.title}'입니다!`,
+          text: result.summary.title,
           url: shareUrl,
         });
       } catch (err) {
-        console.error("Share error:", err);
+        console.error(err);
       }
     } else {
-      // 복사 기능으로 대체
       await navigator.clipboard.writeText(shareUrl);
-      toast.success("공유 링크가 클립보드에 복사되었습니다!");
+      toast.success(t("common.share"));
     }
   };
 
   return (
-    <div className="mx-auto max-w-4xl space-y-8 pb-16">
-      {/* Hidden share card for capture */}
+    <div className="mx-auto max-w-4xl space-y-8 pb-16 pt-20">
       <ShareCard result={result} cardRef={cardRef} />
-      {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
         className="text-center space-y-3"
       >
         <div className="flex flex-col items-center gap-4 mb-2">
@@ -422,42 +246,40 @@ export function AnalysisResultDisplay({
             <Sparkles className="mr-1.5 h-3 w-3" />
             {t("result.badges.complete")}
           </div>
-
           <div className="flex gap-2">
             <Button
               onClick={handleDownload}
               disabled={isDownloading}
               variant="outline"
               size="sm"
-              className="rounded-full shadow-sm hover:bg-primary hover:text-primary-foreground transition-all group"
+              className="rounded-full shadow-sm"
             >
               {isDownloading ? (
                 <span className="animate-spin mr-2">◌</span>
               ) : (
-                <Download className="mr-2 h-4 w-4 group-hover:scale-110 transition-transform" />
+                <Download className="mr-2 h-4 w-4" />
               )}
-              {t("common.download") || "다운로드"}
+              {t("common.download")}
             </Button>
             <Button
               onClick={handleShare}
               variant="default"
               size="sm"
-              className="rounded-full shadow-md hover:shadow-lg transition-all group"
+              className="rounded-full shadow-md"
             >
-              <Share2 className="mr-2 h-4 w-4 group-hover:scale-110 transition-transform" />
-              {t("common.share") || "SNS 공유하기"}
+              <Share2 className="mr-2 h-4 w-4" />
+              {t("common.share")}
             </Button>
           </div>
         </div>
-
-        <h1 className="text-3xl md:text-4xl font-display font-bold tracking-tight">
+        <h1 className="text-4xl md:text-6xl font-display font-bold tracking-tight text-primary">
           {result.summary.title}
         </h1>
-        <div className="flex flex-wrap justify-center gap-2 pt-1">
+        <div className="flex flex-wrap justify-center gap-2 pt-2">
           {result.summary.keywords.map((keyword, i) => (
             <span
               key={i}
-              className="rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary"
+              className="rounded-full bg-primary/[0.03] border border-primary/5 px-4 py-1 text-[10px] uppercase tracking-widest font-bold text-primary/60"
             >
               {keyword}
             </span>
@@ -465,16 +287,88 @@ export function AnalysisResultDisplay({
         </div>
         <FormattedText
           text={result.summary.description}
-          className="mx-auto max-w-[600px] text-muted-foreground text-left md:text-center"
+          className="mx-auto max-w-[600px] text-muted-foreground"
         />
       </motion.div>
-      {/* Analysis Card */}
+
       <motion.div
         custom={0}
         variants={sectionVariants}
         initial="hidden"
         animate="visible"
+        className="space-y-8"
       >
+        {result.profile && (
+          <Card className="border-primary/30 bg-primary/5">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <Sparkles className="h-5 w-5 text-primary" />
+                {t("result.analysis.visualProfile")}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-6 md:grid-cols-2 text-sm">
+                <div className="space-y-4">
+                  <div>
+                    <h4 className="font-semibold text-muted-foreground mb-2 uppercase tracking-wider">
+                      Hair & Face
+                    </h4>
+                    <p>
+                      • {t("result.beauty.hairStyle")}:{" "}
+                      {result.profile.hair.style} ({result.profile.hair.color})
+                    </p>
+                    <p>
+                      • {t("result.analysis.faceShape")}:{" "}
+                      {result.profile.face.shape}
+                    </p>
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-muted-foreground mb-2 uppercase tracking-wider">
+                      Body
+                    </h4>
+                    <p>
+                      • {t("result.analysis.bodyType")}:{" "}
+                      {result.profile.body.type}
+                    </p>
+                  </div>
+                </div>
+                <div className="space-y-4">
+                  <div>
+                    <h4 className="font-semibold text-muted-foreground mb-2 uppercase tracking-wider">
+                      Apparel
+                    </h4>
+                    <p>
+                      • {t("result.fashion.tops")}:{" "}
+                      {result.profile.apparel.top.color}{" "}
+                      {result.profile.apparel.top.category}
+                    </p>
+                    <p>
+                      • {t("result.fashion.bottoms")}:{" "}
+                      {result.profile.apparel.bottom.color}{" "}
+                      {result.profile.apparel.bottom.category}
+                    </p>
+                  </div>
+                  <div className="pt-2">
+                    <div className="inline-block rounded-lg bg-background p-3 border shadow-sm w-full">
+                      <p className="text-xs font-bold text-primary mb-1">
+                        {t("result.analysis.confidence")}
+                      </p>
+                      <div className="w-full bg-muted rounded-full h-2">
+                        <div
+                          className="bg-primary h-2 rounded-full"
+                          style={{
+                            width: `${result.profile.metadata.confidence * 100}%`,
+                          }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-lg">
@@ -508,13 +402,13 @@ export function AnalysisResultDisplay({
               ].map((item, i) => (
                 <div
                   key={i}
-                  className="flex items-start gap-4 rounded-lg bg-muted/50 p-4 transition-colors hover:bg-muted/70"
+                  className="flex items-start gap-4 rounded-lg bg-muted/50 p-4"
                 >
-                  <div className="mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-background shadow-sm text-primary">
+                  <div className="mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-background text-primary">
                     {getIconForType(item.type, item.value)}
                   </div>
-                  <div className="space-y-1">
-                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  <div>
+                    <p className="text-xs font-semibold text-muted-foreground uppercase">
                       {item.label}
                     </p>
                     <p className="text-base font-medium">{item.value}</p>
@@ -525,7 +419,7 @@ export function AnalysisResultDisplay({
           </CardContent>
         </Card>
       </motion.div>
-      {/* Fashion Card */}
+
       <motion.div
         custom={1}
         variants={sectionVariants}
@@ -575,13 +469,13 @@ export function AnalysisResultDisplay({
               ].map((item, i) => (
                 <div
                   key={i}
-                  className="flex flex-col gap-3 rounded-lg bg-muted/50 p-4 transition-colors hover:bg-muted/70"
+                  className="flex flex-col gap-3 rounded-lg bg-muted/50 p-4"
                 >
                   <div className="flex items-center gap-2">
-                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-background shadow-sm text-primary">
+                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-background text-primary">
                       {getFashionIcon(item.type)}
                     </div>
-                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                    <p className="text-xs font-semibold text-muted-foreground uppercase">
                       {item.label}
                     </p>
                   </div>
@@ -594,10 +488,9 @@ export function AnalysisResultDisplay({
                 </div>
               ))}
             </div>
-
             <div className="border-t pt-4 space-y-3">
               <div>
-                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+                <p className="text-xs font-semibold text-muted-foreground uppercase mb-2">
                   {t("result.fashion.colorsToWear")}
                 </p>
                 <div className="flex flex-wrap gap-2">
@@ -607,7 +500,7 @@ export function AnalysisResultDisplay({
                 </div>
               </div>
               <div>
-                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+                <p className="text-xs font-semibold text-muted-foreground uppercase mb-2">
                   {t("result.fashion.colorsToAvoid")}
                 </p>
                 <div className="flex flex-wrap gap-2">
@@ -620,146 +513,7 @@ export function AnalysisResultDisplay({
           </CardContent>
         </Card>
       </motion.div>
-      {/* Beauty Card */}
-      <motion.div
-        custom={2}
-        variants={sectionVariants}
-        initial="hidden"
-        animate="visible"
-      >
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-lg">
-              <Gem className="h-5 w-5 text-primary" />
-              {t("result.beauty.title")}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <FormattedText
-              as="div"
-              text={result.beauty.overview}
-              className="text-muted-foreground"
-            />
-            <div className="grid gap-4 sm:grid-cols-2">
-              {[
-                {
-                  label: t("result.beauty.foundation"),
-                  value: result.beauty.foundation,
-                },
-                {
-                  label: t("result.beauty.eyeMakeup"),
-                  value: result.beauty.eyeMakeup,
-                },
-                {
-                  label: t("result.beauty.lipColor"),
-                  value: result.beauty.lipColor,
-                },
-                { label: t("result.beauty.blush"), value: result.beauty.blush },
-                {
-                  label: t("result.beauty.hairStyle"),
-                  value: result.beauty.hairStyle,
-                },
-                {
-                  label: t("result.beauty.hairColor"),
-                  value: result.beauty.hairColor,
-                },
-              ].map((item, i) => (
-                <div key={i} className="space-y-1">
-                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                    {item.label}
-                  </p>
-                  <p className="text-sm">{item.value}</p>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      </motion.div>
-      {/* Moodboard Section */}
-      <motion.div
-        custom={3}
-        variants={sectionVariants}
-        initial="hidden"
-        animate="visible"
-      >
-        <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-transparent">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-lg">
-              <Palette className="h-5 w-5 text-primary" />
-              {t("result.moodboard.title")}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            {/* Color Palette */}
-            <div>
-              <h4 className="text-sm font-semibold mb-3 text-muted-foreground">
-                {t("result.moodboard.palette")}
-              </h4>
-              <div className="grid grid-cols-3 md:grid-cols-6 gap-3">
-                {result.fashion.colorsToWear.map((color, i) => (
-                  <div key={i} className="flex flex-col items-center gap-2">
-                    <div
-                      className="w-16 h-16 rounded-lg shadow-md border border-border"
-                      style={{
-                        background: getColorValue(color),
-                      }}
-                    />
-                    <span className="text-xs text-center font-medium">
-                      {color}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
 
-            {/* Style Keywords */}
-            <div>
-              <h4 className="text-sm font-semibold mb-3 text-muted-foreground">
-                {t("result.moodboard.keywords")}
-              </h4>
-              <div className="flex flex-wrap gap-2">
-                {result.summary.keywords.map((keyword, i) => (
-                  <span
-                    key={i}
-                    className="rounded-full bg-primary/10 px-4 py-2 text-sm font-semibold text-primary border border-primary/20"
-                  >
-                    {keyword}
-                  </span>
-                ))}
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </motion.div>
-      {/* AI Generated Style Image */}
-      {/* <StyleImageSection result={result} /> */}
-      {/* Action Items */}
-      <motion.div
-        custom={4}
-        variants={sectionVariants}
-        initial="hidden"
-        animate="visible"
-      >
-        <Card className="border-primary/20 bg-primary/5">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-lg">
-              <ListChecks className="h-5 w-5 text-primary" />
-              {t("result.actionItems")}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ul className="space-y-3">
-              {result.actionItems.map((item, i) => (
-                <li key={i} className="flex items-start gap-3">
-                  <ChevronRight className="h-4 w-4 mt-0.5 text-primary flex-shrink-0" />
-                  <span className="text-sm leading-relaxed">{item}</span>
-                </li>
-              ))}
-            </ul>
-          </CardContent>
-        </Card>
-      </motion.div>
-      {/* Shopping / Affiliate Suggestion (Monetization) */}
       <motion.div
         custom={5}
         variants={sectionVariants}
@@ -771,7 +525,7 @@ export function AnalysisResultDisplay({
             <div className="flex items-center justify-between">
               <CardTitle className="flex items-center gap-2 text-lg">
                 <Shirt className="h-5 w-5 text-primary" />
-                추천 스타일 쇼핑하기
+                {t("result.shop.title")}
               </CardTitle>
               <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-primary/10 text-primary uppercase tracking-wider">
                 Partner
@@ -782,12 +536,15 @@ export function AnalysisResultDisplay({
             <div className="flex flex-col md:flex-row gap-6 items-center justify-between">
               <div className="space-y-2 flex-1 text-center md:text-left">
                 <h3 className="font-semibold text-lg">
-                  {result.summary.title}에 어울리는 아이템
+                  {t("result.shop.itemSuggestion").replace(
+                    "{title}",
+                    result.summary.title,
+                  )}
                 </h3>
                 <p className="text-sm text-muted-foreground">
-                  AI가 분석한 퍼스널 컬러 <b>{result.analysis.colorSeason}</b>와{" "}
-                  <b>{result.analysis.bodyType}</b> 체형을 돋보이게 해줄 베스트
-                  아이템들을 선별했습니다.
+                  {t("result.shop.desc")
+                    .replace("{color}", result.analysis.colorSeason)
+                    .replace("{body}", result.analysis.bodyType)}
                 </p>
               </div>
               <Button
@@ -799,10 +556,10 @@ export function AnalysisResultDisplay({
                   href="#shop-link"
                   onClick={(e) => {
                     e.preventDefault();
-                    toast.success("향후 쇼핑몰 제휴 링크로 연결될 영역입니다.");
+                    toast.success("Shopping link coming soon");
                   }}
                 >
-                  맞춤 아이템 보기
+                  {t("result.shop.button")}
                   <ChevronRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
                 </a>
               </Button>
@@ -810,7 +567,7 @@ export function AnalysisResultDisplay({
           </CardContent>
         </Card>
       </motion.div>
-      {/* Save History Suggestion (Login Drive) */}
+
       <motion.div
         custom={5}
         variants={sectionVariants}
@@ -821,31 +578,30 @@ export function AnalysisResultDisplay({
           <div className="absolute top-0 right-0 w-32 h-32 bg-accent/10 rounded-full blur-2xl translate-x-16 -translate-y-16" />
           <CardHeader>
             <CardTitle className="text-lg">
-              분석 결과를 저장하고 싶으신가요?
+              {t("result.historySuggestion.title")}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <p className="text-sm text-muted-foreground">
-              로그인하시면 지금까지의 모든 스타일 분석 기록을 언제 어디서나 다시
-              확인하실 수 있습니다. 나만의 스타일 변천사를 기록해보세요.
+              {t("result.historySuggestion.desc")}
             </p>
             <Button
               variant="outline"
               className="w-full md:w-auto rounded-full border-accent/30 hover:bg-accent hover:text-accent-foreground"
               asChild
             >
-              <a href="/login">무료로 시작하고 결과 저장하기</a>
+              <a href="/login">{t("result.historySuggestion.button")}</a>
             </Button>
           </CardContent>
         </Card>
       </motion.div>
-      {/* Reset Button */}
+
       <motion.div
         custom={4}
         variants={sectionVariants}
         initial="hidden"
         animate="visible"
-        className="flex justify-center"
+        className="flex flex-wrap justify-center gap-4"
       >
         <Button
           variant="outline"
@@ -856,19 +612,21 @@ export function AnalysisResultDisplay({
           <ArrowLeft className="mr-2 h-4 w-4" />
           {actualResetLabel}
         </Button>
-
         <Button
           variant="default"
           size="lg"
           onClick={() =>
             router.push(`/checkout?analysis_id=${(result as any).id}`)
           }
-          className="rounded-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 border-none shadow-lg group"
+          className="rounded-full bg-primary text-primary-foreground hover:bg-primary/90 shadow-xl shadow-primary/20 group relative overflow-hidden h-14 px-8 border-none"
         >
-          <Sparkles className="mr-2 h-4 w-4 text-yellow-300 group-hover:animate-pulse" />
-          전문가 심층 리포트 보기
+          <Sparkles className="mr-2 h-4 w-4 text-accent transition-transform group-hover:rotate-12" />
+          <span className="font-bold uppercase tracking-wider text-xs">
+            {t("result.premiumReport")}
+          </span>
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
         </Button>
-      </motion.div>{" "}
+      </motion.div>
     </div>
   );
 }

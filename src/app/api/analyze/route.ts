@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getGeminiModel, FALLBACK_MODELS } from "@/lib/gemini";
+import { getGeminiModelJson, FALLBACK_MODELS } from "@/lib/gemini";
 import {
   getTextAnalysisPrompt,
   getImageAnalysisPrompt,
   getCombinedAnalysisPrompt,
 } from "@/lib/prompts";
+import { visualAnalysisSchema } from "@/lib/validation";
 import { ko } from "@/lib/i18n/ko";
 import { en } from "@/lib/i18n/en";
 
@@ -89,7 +90,7 @@ export async function POST(request: NextRequest) {
     // Try each model in fallback order
     for (const modelName of FALLBACK_MODELS) {
       console.log(`Trying model: ${modelName}`);
-      const model = getGeminiModel(modelName);
+      const model = getGeminiModelJson(modelName);
 
       // Retry up to 2 times per model
       for (let attempt = 0; attempt < 2; attempt++) {
@@ -101,15 +102,17 @@ export async function POST(request: NextRequest) {
           }
 
           const responseText = result.response.text();
+          const analysisResult = JSON.parse(responseText);
 
-          // Parse JSON — handle markdown code blocks
-          let jsonStr = responseText;
-          const jsonMatch = responseText.match(/```(?:json)?\s*([\s\S]*?)```/);
-          if (jsonMatch) {
-            jsonStr = jsonMatch[1].trim();
+          // Validate VisualAnalysisProfile if present in the response
+          if (analysisResult.profile) {
+            const validation = visualAnalysisSchema.safeParse(analysisResult.profile);
+            if (!validation.success) {
+              console.error("Visual profile validation failed:", validation.error.format());
+              // Optional: throw new Error("분석 데이터 형식이 올바르지 않습니다.");
+            }
           }
 
-          const analysisResult = JSON.parse(jsonStr);
           console.log(`✅ Success with model: ${modelName}`);
           return NextResponse.json({
             result: analysisResult,

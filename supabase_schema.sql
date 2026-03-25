@@ -15,6 +15,9 @@ CREATE TABLE analysis_history (
   beauty JSONB NOT NULL,
   action_items JSONB NOT NULL,
   
+  -- 고도화된 정밀 분석 필드 추가
+  visual_profile JSONB,
+  
   -- 바이럴 엔진 관련 필드 추가
   persona_type TEXT,
   core_keywords TEXT[],
