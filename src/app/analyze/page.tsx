@@ -2,9 +2,9 @@
 
 import * as React from "react";
 import { Header } from "@/components/layout/Header";
-import { UploadForm } from "@/components/features/UploadForm";
-import { TextInput } from "@/components/features/TextInput";
-import { AnalysisResultDisplay } from "@/components/features/AnalysisResult";
+import { UploadForm } from "@/features/analyze/components/UploadForm";
+import { TextInput } from "@/features/analyze/components/TextInput";
+import { AnalysisResultDisplay } from "@/features/analyze/components/AnalysisResult";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Sparkles, Loader2, Camera, PenLine } from "lucide-react";

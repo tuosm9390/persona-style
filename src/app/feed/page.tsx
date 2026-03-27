@@ -7,7 +7,7 @@ import { Share2, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getPublicFeed, type AnalysisHistoryItem } from "@/lib/history";
-import { FeedCard } from "@/components/features/Trend/FeedCard";
+import { FeedCard } from "@/features/shared/components/Trend/FeedCard";
 
 export default function FeedPage() {
   const { t } = useLanguage();

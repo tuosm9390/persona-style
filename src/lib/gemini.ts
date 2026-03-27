@@ -137,12 +137,12 @@ export function categorizeGeminiError(error: unknown): GeminiErrorInfo {
   return GEMINI_ERROR_MAP.FATAL;
 }
 
-export function getGeminiModel(modelName: string = "gemini-2.5-flash-image") {
+export function getGeminiModel(modelName: string = "gemini-1.5-flash") {
   return genAI.getGenerativeModel({ model: modelName });
 }
 
 export function getGeminiModelJson(
-  modelName: string = "gemini-2.5-flash-image",
+  modelName: string = "gemini-1.5-flash",
 ) {
   return genAI.getGenerativeModel({
     model: modelName,

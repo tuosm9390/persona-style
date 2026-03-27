@@ -2,7 +2,7 @@ import { Metadata } from "next";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
-import { AnalysisResultDisplay } from "@/components/features/AnalysisResult";
+import { AnalysisResultDisplay } from "@/features/analyze/components/AnalysisResult";
 import { notFound } from "next/navigation";
 import { AnalysisResult } from "@/lib/types";
 

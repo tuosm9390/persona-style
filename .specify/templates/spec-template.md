@@ -84,6 +84,8 @@
 
 ### Functional Requirements
 
+- **FR-ARC-001**: Domain logic MUST be isolated within `src/features/{feature}` directories.
+- **FR-ARC-002**: Business logic MUST be implemented in Service Layer (`*.service.ts`) and NOT in routes or UI.
 - **FR-SEC-001**: System MUST validate all user inputs at the API boundary using Zod or equivalent.
 - **FR-SEC-002**: Database access MUST strictly follow Supabase RLS policies to ensure data isolation.
 - **FR-SEC-003**: All shared or aggregated trend data MUST be anonymized before exposure.

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
-import TrendDashboard from '@/components/features/Trend';
+import TrendDashboard from "@/features/shared/components/Trend";
 import { BarChart3, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { PersonaDistribution } from '@/types/viral';

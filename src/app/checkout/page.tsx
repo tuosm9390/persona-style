@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, Suspense } from "react";
-import PricingCard from "@/components/features/Payment/PricingCard";
+import PricingCard from "@/features/premium/components/PricingCard";
 import { toast } from "sonner";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";

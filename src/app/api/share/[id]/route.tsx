@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 import satori from 'satori';
 import { Resvg } from '@resvg/resvg-js';
-import ShareCard from '@/components/features/ShareCard/index';
+import ShareCard from '@/features/shared/components/ShareImage';
 import { PERSONA_DESIGN_TOKENS } from '@/types/viral';
 
 // 폰트 캐싱용 변수

@@ -3,7 +3,7 @@
 import * as React from "react";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
-import { AnalysisResultDisplay } from "@/components/features/AnalysisResult";
+import { AnalysisResultDisplay } from "@/features/analyze/components/AnalysisResult";
 import { Button } from "@/components/ui/button";
 import { FormattedText } from "@/components/ui/formatted-text";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";

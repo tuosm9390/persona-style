@@ -1,15 +1,20 @@
 <!--
 Sync Impact Report
-Date: 2026-03-25 14:15:00
+Date: 2026-03-27 11:45:00
 Author: Antigravity
-Version change: 1.4.0 → 1.4.1
+Version change: 1.4.1 → 1.5.0
 Modified principles: 
-  - X. 프리미엄 서비스 및 결제 무결성: 결제 수단(Portone) 및 PDF 생성 방식(react-pdf/renderer) 구체화
-Added sections: 기술 스택 정렬 (Tech Stack Alignment) 세부 내용 업데이트
-Templates updated: ✅ .specify/memory/constitution.md
+  - II. 시니어 개발자 페르소나: 코드 구조 무결성 유지 및 관심사 분리 책임 명시
+  - 기술 스택 정렬: 서비스 레이어(Service Layer) 및 기능 기반 구조 도입 반영
+Added sections: 
+  - XII. 기능 기반 아키텍처 및 관심사 분리 (SOC): 비즈니스 로직과 UI/라우트의 엄격한 분리 원칙 추가
+Templates updated: 
+  - ✅ .specify/memory/constitution.md
+  - ✅ .specify/templates/plan-template.md (Constitution Check 항목 추가)
+  - ✅ .specify/templates/spec-template.md (아키텍처 요구사항 보강)
+  - ✅ .specify/templates/tasks-template.md (서비스 레이어 태스크 유형 추가)
 Follow-up TODOs: 
-  - ✅ .specify/templates/plan-template.md 내 기술 스택 동기화 완료
-  - ✅ .specify/templates/spec-template.md 내 요구사항 번호 체계 동기화 완료
+  - [ ] 향후 API 엔드포인트 추가 시 새로운 서비스 레이어 패턴 준수 여부 전수 검증
 -->
 
 # PersonaStyle Constitution
@@ -21,8 +26,8 @@ Follow-up TODOs:
 - **Rationale**: 사용자 요구사항의 정확한 이해와 프로젝트 내부 소통의 일관성을 유지하기 위함입니다. (예외: 메모리 항목은 영어로 작성하되 한글 번역 첨부)
 
 ### II. 시니어 개발자 페르소나 (Senior Developer Persona)
-책임감 있는 엘리트 시니어 개발자로서 행동하며, 단순한 답변을 넘어 선제적으로 문제를 해결합니다.
-- **Rationale**: 프로젝트의 기술적 무결성을 확보하고 사용자에게 신뢰할 수 있는 결과물을 제공하기 위함입니다.
+책임감 있는 엘리트 시니어 개발자로서 행동하며, 단순한 답변을 넘어 선제적으로 문제를 해결합니다. 특히 코드의 구조적 무결성과 아키텍처 일관성을 유지할 책임이 있습니다.
+- **Rationale**: 프로젝트의 기술적 무결성을 확보하고 장기적인 유지보수성을 보장하기 위함입니다.
 
 ### III. 테스트 주도 개발 (TDD Mandatory)
 모든 기능 구현 시 Red-Green-Refactor 주기를 엄격히 준수합니다. 테스트를 먼저 작성하고 사용자 승인을 받은 후, 테스트 실패를 확인하고 구현에 착수합니다.
@@ -60,25 +65,29 @@ Follow-up TODOs:
 AI 엔진(Gemini 1.5 Pro 등)의 프롬프트는 버전 관리되어야 하며, 모든 AI 응답은 정의된 스키마(Zod)를 엄격히 준수해야 합니다. 할루시네이션(환각) 방지를 위해 시스템 프롬프트에 명확한 제약 조건을 포함해야 합니다.
 - **Rationale**: 모델 업데이트나 프롬프트 변경에도 일관된 분석 결과와 서비스 품질을 보장하기 위함입니다.
 
+### XII. 기능 기반 아키텍처 및 관심사 분리 (Feature-Based Architecture & SOC)
+코드는 도메인별 기능(`src/features/{feature}`) 단위로 응집되어야 하며, 비즈니스 로직은 API 라우트나 UI 컴포넌트가 아닌 서비스 레이어(`*.service.ts`)에 위치해야 합니다.
+- **Rationale**: 기능 간 결합도를 낮추고 로직의 재사용성과 테스트 가능성을 극대화하기 위함입니다.
+
 ## 기술 스택 정렬 (Tech Stack Alignment)
-본 프로젝트는 **Next.js 16**, **Supabase (SSR)**, **Tailwind CSS**, **TypeScript 5.x**, **Portone (결제)**, **Gemini 1.5 Pro (AI)**, **react-pdf/renderer (PDF)**를 기반으로 합니다.
+본 프로젝트는 **Next.js 16 (App Router)**, **Supabase (SSR)**, **Tailwind CSS**, **TypeScript 5.x**, **Portone (결제)**, **Gemini 1.5 Pro (AI)**, **react-pdf/renderer (PDF)**를 기반으로 합니다.
+- **아키텍처 패턴**: 기능 기반 구조(Feature-based) 및 서비스 레이어 패턴을 준수합니다.
 - 모든 기능은 서버 사이드 인증과 클라이언트 사이드 상태 관리의 조화를 최우선으로 고려하여 설계되어야 합니다.
-- 새로운 라이브러리 도입 시 반드시 기존 스택과의 호환성을 먼저 검증해야 합니다.
 
 ## 품질 게이트 (Quality Gates)
 구현 완료 전 반드시 다음 단계를 통과해야 합니다.
 1. 모든 단위 및 통합 테스트 통과 (Vitest 기반).
 2. `npm run lint` 실행 시 에러 없음.
-3. 시크릿(API Key 등)의 하드코딩 여부 전수 조사.
-4. 시각적 결과물의 해상도 및 로딩 성능 검증 (3초 이내).
-5. 커뮤니티 공유 시 데이터 익명화 여부 전수 검증.
-6. 결제 트랜잭션 무결성 및 PDF 리포트 가독성 검증.
-7. AI 응답 스키마 준수 및 프롬프트 버전 확인.
-8. 사용자 시나리오 기반의 최종 검증 보고서 작성.
+3. 코드 구조가 `src/features` 패턴을 준수하며 서비스 레이어가 분리되었는지 확인.
+4. 시크릿(API Key 등)의 하드코딩 여부 전수 조사.
+5. 시각적 결과물의 해상도 및 로딩 성능 검증 (3초 이내).
+6. 데이터 익명화 및 RLS 접근 제어 검증.
+7. 결제 트랜잭션 무결성 및 PDF 리포트 품질 검증.
+8. AI 응답 스키마 준수 확인.
 
 ## Governance
 헌장은 프로젝트의 모든 개발 관행에 우선하며, 모든 작업 계획은 헌장 준수 여부를 포함해야 합니다.
 - 헌장 수정은 문서화된 제안과 승인 절차를 거쳐야 하며, 수정 시 버전 번호를 갱신합니다.
 - `CONSTITUTION_VERSION`은 유의적 버전(MAJOR.MINOR.PATCH) 규칙을 따릅니다.
 
-**Version**: 1.4.1 | **Ratified**: 2026-03-24 | **Last Amended**: 2026-03-25
+**Version**: 1.5.0 | **Ratified**: 2026-03-24 | **Last Amended**: 2026-03-27

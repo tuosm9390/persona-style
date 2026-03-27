@@ -3,7 +3,7 @@
 import * as React from "react";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
-import { AnalysisResultDisplay } from "@/components/features/AnalysisResult";
+import { AnalysisResultDisplay } from "@/features/analyze/components/AnalysisResult";
 import { Button } from "@/components/ui/button";
 import { getExamples } from "@/lib/examples";
 import { useLanguage } from "@/contexts/LanguageContext";

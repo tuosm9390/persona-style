@@ -1,6 +1,6 @@
 import { renderToStream, renderToBuffer } from '@react-pdf/renderer';
 import React from 'react';
-import PDFTemplate from '@/components/features/PremiumReport/PDFTemplate';
+import PDFTemplate from "@/features/premium/components/PDFTemplate";
 import { DeepAnalysisResult } from '@/types/premium';
 
 export async function generatePDFStream(data: DeepAnalysisResult, personaType: string) {

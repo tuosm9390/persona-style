@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import Matcher from '@/components/features/Matcher';
+import Matcher from "@/features/match/components";
 import { toast } from 'sonner';
 
 interface MatchResult {
