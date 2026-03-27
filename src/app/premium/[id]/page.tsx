@@ -15,6 +15,7 @@ import {
   Heart,
   ShoppingBag,
   Info,
+  Loader2,
 } from "lucide-react";
 import { toast } from "sonner";
 import { FormattedText } from "@/components/ui/formatted-text";
@@ -31,6 +32,7 @@ export default function PremiumReportPage({
   const { id } = React.use(params);
   const [report, setReport] = useState<PremiumReport | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isDownloading, setIsDownloading] = useState(false);
   const supabase = createClient();
 
   useEffect(() => {
@@ -54,8 +56,36 @@ export default function PremiumReportPage({
     fetchReport();
   }, [id, supabase]);
 
-  const handleDownload = () => {
-    window.location.href = `/api/premium/pdf/${id}`;
+  const handleDownload = async () => {
+    if (isDownloading) return;
+
+    setIsDownloading(true);
+    const toastId = toast.loading("리포트 파일을 생성하고 있습니다. 잠시만 기다려주세요...");
+
+    try {
+      const response = await fetch(`/api/premium/pdf/${id}`);
+      
+      if (!response.ok) {
+        throw new Error("PDF 생성에 실패했습니다.");
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `PersonaStyle_Report_${id}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      
+      toast.success("다운로드가 시작되었습니다.", { id: toastId });
+    } catch (error) {
+      console.error("Download error:", error);
+      toast.error("리포트 다운로드 중 오류가 발생했습니다.", { id: toastId });
+    } finally {
+      setIsDownloading(false);
+    }
   };
 
   if (isLoading) {
@@ -118,11 +148,16 @@ export default function PremiumReportPage({
         </div>
         <Button
           onClick={handleDownload}
+          disabled={isDownloading}
           size="lg"
-          className="rounded-full shadow-xl gap-2 h-14 px-8 text-lg font-bold hover:scale-105 transition-transform"
+          className="rounded-full shadow-xl gap-2 h-14 px-8 text-lg font-bold hover:scale-105 transition-transform disabled:opacity-70 disabled:hover:scale-100"
         >
-          <Download className="h-5 w-5" />
-          PDF 다운로드
+          {isDownloading ? (
+            <Loader2 className="h-5 w-5 animate-spin" />
+          ) : (
+            <Download className="h-5 w-5" />
+          )}
+          {isDownloading ? "생성 중..." : "PDF 다운로드"}
         </Button>
       </div>
 
@@ -145,7 +180,7 @@ export default function PremiumReportPage({
                 </CardTitle>
               </CardHeader>
               <CardContent className="pt-6 text-lg leading-relaxed italic text-muted-foreground">
-                "{analysis.summary?.brandAura}"
+                &quot;{analysis.summary?.brandAura}&quot;
               </CardContent>
             </Card>
             <Card className="border-2 border-secondary/20 shadow-sm">

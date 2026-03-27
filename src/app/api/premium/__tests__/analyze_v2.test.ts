@@ -1,10 +1,11 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { describe, it, expect, vi } from "vitest";
 import { POST } from "../analyze/route";
 import { NextRequest } from "next/server";
 
 // Mock Supabase
 vi.mock("@/lib/supabase/server", () => ({
-  createClient: vi.fn(() => ({
+  createServerSupabaseClient: vi.fn(() => ({
     auth: {
       getUser: vi.fn(() => Promise.resolve({ data: { user: { id: "test-user-id" } } })),
     },
@@ -17,7 +18,7 @@ vi.mock("@/lib/supabase/server", () => ({
         if (table === "analysis_history") {
           return Promise.resolve({
             data: {
-              id: "test-analysis-id",
+              id: "550e8400-e29b-41d4-a716-446655440000",
               summary: { title: "Test Persona", keywords: ["test"] },
               analysis: { colorSeason: "Spring", bodyType: "Hourglass", faceShape: "Oval" },
               fashion: { overview: "Test fashion" },
@@ -47,28 +48,32 @@ vi.mock("@/lib/supabase/server", () => ({
 }));
 
 // Mock Gemini
-vi.mock("@/lib/gemini", () => ({
-  getGeminiModelJson: vi.fn(() => ({
-    generateContent: vi.fn(() => Promise.resolve({
-      response: {
-        text: () => JSON.stringify({
-          summary: { title: "Premium Brand", keywords: ["luxury"], brandAura: "Powerful" },
-          deepAnalysis: { colorPsychology: "Trust", structuralHarmony: "Balanced", vibeArchetype: "Leader" },
-          strategicStyling: { businessExecutive: "Suit", socialInfluence: "Chic", offDutyLuxury: "Silk" },
-          expertRecommendations: { careerAdvice: "Lead", relationshipTips: "Connect", lifestyleUpgrade: "Groom" },
-          detailedCapsuleWardrobe: [{ category: "Essentials", items: ["Item 1"], reasoning: "Good" }],
-          actionPlan: { immediate: "Now", shortTerm: "Soon", longTerm: "Future" }
-        })
-      }
+vi.mock("@/lib/gemini", async (importOriginal) => {
+  const actual = await importOriginal() as any;
+  return {
+    ...actual,
+    getGeminiModelJson: vi.fn(() => ({
+      generateContent: vi.fn(() => Promise.resolve({
+        response: {
+          text: () => JSON.stringify({
+            summary: { title: "Premium Brand", keywords: ["luxury"], brandAura: "Powerful" },
+            deepAnalysis: { colorPsychology: "Trust", structuralHarmony: "Balanced", vibeArchetype: "Leader" },
+            strategicStyling: { businessExecutive: "Suit", socialInfluence: "Chic", offDutyLuxury: "Silk" },
+            expertRecommendations: { careerAdvice: "Lead", relationshipTips: "Connect", lifestyleUpgrade: "Groom" },
+            detailedCapsuleWardrobe: [{ category: "Essentials", items: ["Item 1"], reasoning: "Good" }],
+            actionPlan: { immediate: "Now", shortTerm: "Soon", longTerm: "Future" }
+          })
+        }
+      })),
     })),
-  })),
-}));
+  };
+});
 
 describe("Premium Analyze API", () => {
   it("should generate a premium report successfully", async () => {
     const req = new NextRequest("http://localhost:3000/api/premium/analyze", {
       method: "POST",
-      body: JSON.stringify({ analysis_id: "test-analysis-id" }),
+      body: JSON.stringify({ analysis_id: "550e8400-e29b-41d4-a716-446655440000" }),
     });
 
     const response = await POST(req);
@@ -81,14 +86,14 @@ describe("Premium Analyze API", () => {
 
   it("should return 401 if unauthorized", async () => {
     // Override mock for this test
-    const { createClient } = await import("@/lib/supabase/server");
-    (createClient as any).mockReturnValueOnce({
+    const { createServerSupabaseClient } = await import("@/lib/supabase/server");
+    vi.mocked(createServerSupabaseClient).mockReturnValueOnce({
       auth: { getUser: vi.fn(() => Promise.resolve({ data: { user: null } })) }
-    });
+    } as any);
 
     const req = new NextRequest("http://localhost:3000/api/premium/analyze", {
       method: "POST",
-      body: JSON.stringify({ analysis_id: "test-analysis-id" }),
+      body: JSON.stringify({ analysis_id: "550e8400-e29b-41d4-a716-446655440000" }),
     });
 
     const response = await POST(req);

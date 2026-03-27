@@ -1,11 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getGeminiModelJson, FALLBACK_MODELS } from "@/lib/gemini";
+import { getGeminiModelJson, FALLBACK_MODELS, categorizeGeminiError, GeminiErrorInfo } from "@/lib/gemini";
 import {
   getTextAnalysisPrompt,
   getImageAnalysisPrompt,
   getCombinedAnalysisPrompt,
 } from "@/lib/prompts";
 import { visualAnalysisSchema, analyzeRequestSchema, validateRequest } from "@/lib/validation";
+import { Part } from "@google/generative-ai";
+import { logger } from "@/lib/logger";
 
 /**
  * Parse Gemini API retry delay from error message
@@ -21,27 +23,9 @@ function parseRetryDelay(errorMessage?: string): number | null {
 }
 
 /**
- * Check if the error indicates the daily quota is fully exhausted (limit: 0).
- * When limit: 0, retrying with the same model is pointless.
- */
-function isDailyQuotaExhausted(errorMessage?: string): boolean {
-  if (!errorMessage) return false;
-  return errorMessage.includes("limit: 0");
-}
-
-/**
- * Check if the error indicates the project has exceeded its spending cap.
- * This is a hard limit at the project level.
- */
-function isSpendingCapExceeded(errorMessage?: string): boolean {
-  if (!errorMessage) return false;
-  return errorMessage.includes("exceeded its spending cap") || errorMessage.includes("billing");
-}
-
-/**
  * Build the prompt array based on input type
  */
-function buildPrompt(image?: string, text?: string, language: string = "ko") {
+function buildPrompt(image?: string, text?: string, language: string = "ko"): string | (string | Part)[] {
   if (image && text) {
     const imageData = image.split(",")[1] || image;
     const mimeType = image.startsWith("data:")
@@ -61,12 +45,14 @@ function buildPrompt(image?: string, text?: string, language: string = "ko") {
       getImageAnalysisPrompt(language),
     ];
   } else {
-    return getTextAnalysisPrompt(language) + `\n\n${text}`;
+    return getTextAnalysisPrompt(language) + `\n\n${text || ""}`;
   }
 }
 
 export async function POST(request: NextRequest) {
   let language = "ko";
+  const requestId = Math.random().toString(36).substring(7);
+
   try {
     const body = await request.json();
     const validation = await validateRequest(analyzeRequestSchema, body);
@@ -79,17 +65,19 @@ export async function POST(request: NextRequest) {
     language = langParam;
 
     const prompt = buildPrompt(image, text, language);
-    let lastError: Error | null = null;
+    let lastErrorInfo: GeminiErrorInfo | null = null;
+
+    logger.info("Starting analysis request", { requestId, hasImage: !!image, hasText: !!text });
 
     // Try each model in fallback order
     for (const modelName of FALLBACK_MODELS) {
-      console.log(`Trying model: ${modelName}`);
+      logger.info(`Trying model: ${modelName}`, { requestId });
       const model = getGeminiModelJson(modelName);
 
       // Retry up to 2 times per model
       for (let attempt = 0; attempt < 2; attempt++) {
         try {
-          const result = await model.generateContent(prompt as any);
+          const result = await model.generateContent(prompt);
 
           if (!result?.response) {
             throw new Error("AI 모델에서 응답을 받지 못했습니다.");
@@ -102,118 +90,78 @@ export async function POST(request: NextRequest) {
           if (analysisResult.profile) {
             const validation = visualAnalysisSchema.safeParse(analysisResult.profile);
             if (!validation.success) {
-              console.error("Visual profile validation failed:", validation.error.format());
+              logger.warn("Visual profile validation failed", { 
+                requestId, 
+                errors: validation.error.format() 
+              });
             }
           }
 
-          console.log(`✅ Success with model: ${modelName}`);
+          logger.info(`✅ Success with model: ${modelName}`, { requestId });
           return NextResponse.json({
             result: analysisResult,
             model: modelName,
           });
         } catch (err: unknown) {
-          lastError = err instanceof Error ? err : new Error(String(err));
+          const errorInfo = categorizeGeminiError(err);
+          lastErrorInfo = errorInfo;
           
-          // Type guard for potential status property from Gemini API error
-          const status = (err && typeof err === 'object' && 'status' in err) ? (err as { status: number }).status : undefined;
-          const is429 = status === 429 || lastError.message?.includes("429");
+          logger.warn(`${modelName} attempt ${attempt + 1} failed`, { 
+            requestId, 
+            errorType: errorInfo.type,
+            error: errorInfo.message.en
+          });
 
-          if (is429) {
-            // Check for Hard Project Limits (Spending Cap)
-            if (isSpendingCapExceeded(lastError.message)) {
-              console.error("🚨 PROJECT CRITICAL: Spending cap exceeded. All Gemini requests blocked.");
-              return NextResponse.json(
-                {
-                  error:
-                    language === "ko"
-                      ? "AI 서비스 운영 비용 한도가 초과되었습니다. 관리자에게 문의하거나 잠시 후 다시 시도해주세요."
-                      : "AI service spending cap exceeded. Please contact the administrator.",
-                  errorType: "SPENDING_CAP",
-                },
-                { status: 429 }
-              );
-            }
+          // Case 1: Critical Project Limits (Spending Cap) - Stop immediately
+          if (errorInfo.type === "SPENDING_CAP_EXHAUSTED" || errorInfo.type === "INVALID_API_KEY") {
+            logger.error(`🚨 CRITICAL ERROR: ${errorInfo.type}`, { requestId });
+            return NextResponse.json(
+              { error: language === "ko" ? errorInfo.message.ko : errorInfo.message.en, errorType: errorInfo.type },
+              { status: errorInfo.status }
+            );
+          }
 
-            // If daily quota is fully gone (limit: 0), skip to next model
-            if (isDailyQuotaExhausted(lastError.message)) {
-              console.log(
-                `❌ ${modelName}: Daily quota exhausted (limit: 0). Trying next model...`
-              );
-              break; // Break inner retry loop, continue to next model
-            }
+          // Case 2: Daily Quota Exhausted for this model - Switch to next model
+          if (errorInfo.type === "DAILY_QUOTA_EXHAUSTED") {
+            break; // Break inner retry loop
+          }
 
-            // Temporary rate limit — wait and retry with same model
-            const retryDelay = parseRetryDelay(lastError.message) || 3000;
+          // Case 3: Temporary Rate Limit - Wait and retry same model
+          if (errorInfo.type === "RATE_LIMIT") {
+            const retryDelay = parseRetryDelay(err instanceof Error ? err.message : "") || 3000;
             if (attempt < 1) {
-              console.log(
-                `⏳ ${modelName}: Temporary rate limit. Waiting ${retryDelay}ms...`
-              );
+              logger.info(`Waiting ${retryDelay}ms for rate limit...`, { requestId });
               await new Promise((r) => setTimeout(r, retryDelay));
-              continue; // Retry same model
+              continue;
             }
           }
 
-          // Non-429 errors or exhausted retries — try next model
-          console.log(
-            `❌ ${modelName} attempt ${attempt + 1} failed: ${lastError.message?.slice(0, 100)}`
-          );
-
-          if (!is429) {
-            // For non-rate-limit errors, don't try other models
-            throw lastError;
+          // Case 4: Non-rate-limit errors (Parse, Network, Fatal) - Log and try next model
+          if (attempt >= 1) {
+            break;
           }
-
-          break; // Move to next model
         }
       }
     }
 
     // All models exhausted
-    console.error("All models exhausted. Last error:", lastError?.message);
+    const finalError = lastErrorInfo || categorizeGeminiError(new Error("Unknown error"));
+    logger.error("All models exhausted", { requestId, finalErrorType: finalError.type });
+    
     return NextResponse.json(
-      {
-        error:
-          language === "ko"
-            ? "현재 AI 서비스 사용량이 모두 소진되었습니다. 잠시 후 다시 시도해주세요."
-            : "AI service quota exhausted. Please try again later.",
-        errorType: "RATE_LIMIT",
+      { 
+        error: language === "ko" ? finalError.message.ko : finalError.message.en,
+        errorType: finalError.type 
       },
-      { status: 429 }
+      { status: finalError.status }
     );
   } catch (error: unknown) {
-    console.error("Analysis error:", error);
+    const errorInfo = categorizeGeminiError(error);
+    logger.error("Fatal analysis error", { requestId, errorInfo });
 
-    // Basic map for error messages based on language
-    const isKo = language === "ko";
-    let message = isKo ? "분석 중 오류가 발생했습니다." : "An error occurred during analysis.";
-    let statusCode = 500;
-
-    if (error instanceof Error) {
-      if (error.message.includes("API key")) {
-        message = isKo
-          ? "API 키가 설정되지 않았습니다. 관리자에게 문의하세요."
-          : "API Key is missing. Please contact administrator.";
-        statusCode = 401;
-      } else if (error.message.includes("JSON")) {
-        message = isKo
-          ? "AI 응답을 처리하는 중 오류가 발생했습니다. 다시 시도해주세요."
-          : "Failed to parse AI response. Please try again.";
-      } else if (
-        error.message.includes("429") ||
-        error.message.includes("quota")
-      ) {
-        message = isKo
-          ? "현재 AI 서비스 사용량이 일시적으로 제한되었습니다. 약 1~2분 후 다시 시도해주세요."
-          : "AI service temporarily limited. Please try again in 1-2 minutes.";
-        statusCode = 429;
-      } else if (error.message.includes("fetch")) {
-        message = isKo
-          ? "AI 서버에 연결할 수 없습니다. 인터넷 연결을 확인해주세요."
-          : "Cannot connect to AI server. Please check your internet connection.";
-        statusCode = 503;
-      }
-    }
-
-    return NextResponse.json({ error: message }, { status: statusCode });
+    return NextResponse.json(
+      { error: language === "ko" ? errorInfo.message.ko : errorInfo.message.en },
+      { status: errorInfo.status }
+    );
   }
 }

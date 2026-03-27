@@ -133,7 +133,7 @@ function CheckoutContent() {
 
     try {
       // 1. Create initial record in DB
-      const { data: tx, error: txError } = await supabase
+      const { error: txError } = await supabase
         .from("payment_transactions")
         .insert({
           user_id: user.id,
@@ -176,7 +176,7 @@ function CheckoutContent() {
               } else {
                 toast.error(`검증 실패: ${data.error}`);
               }
-            } catch (err) {
+            } catch {
               toast.error("결제 검증 중 오류가 발생했습니다.");
             }
           } else {

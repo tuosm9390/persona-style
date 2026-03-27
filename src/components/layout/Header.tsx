@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
-import { Globe, User, LogOut, History } from "lucide-react";
+import { Globe, User, LogOut } from "lucide-react";
 
 export function Header() {
   const { t, language, changeLanguage } = useLanguage();

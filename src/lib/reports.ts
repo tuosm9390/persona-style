@@ -1,7 +1,7 @@
 import { VisualAnalysisProfile } from "./types";
 
 export function generateVisualReport(profile: VisualAnalysisProfile): string {
-  const { hair, face, body, apparel, personalColor } = profile;
+  const { face, body, apparel, personalColor } = profile;
 
   let report = `[Visual Analysis Report]\n\n`;
   report += `1. Face & Skin:\n`;

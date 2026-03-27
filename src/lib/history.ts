@@ -8,6 +8,7 @@ export interface AnalysisHistoryItem {
   inputType: "photo" | "text" | "combined";
   hasPremium?: boolean;
   premiumReportId?: string;
+  share_count?: number;
 }
 
 const STORAGE_KEY = "personastyle_history";

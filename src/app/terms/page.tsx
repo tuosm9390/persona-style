@@ -16,7 +16,7 @@ export default function TermsPage() {
         <div className="space-y-6 text-muted-foreground">
           <section className="space-y-3">
             <h2 className="text-xl font-semibold text-foreground">제 1 조 (목적)</h2>
-            <p>본 약관은 PersonaStyle(이하 "서비스")이 제공하는 AI 퍼스널 스타일링 및 관련 제반 서비스의 이용과 관련하여, 회사와 회원 간의 권리, 의무 및 책임사항 등을 규정함을 목적으로 합니다.</p>
+            <p>본 약관은 PersonaStyle(이하 &quot;서비스&quot;)이 제공하는 AI 퍼스널 스타일링 및 관련 제반 서비스의 이용과 관련하여, 회사와 회원 간의 권리, 의무 및 책임사항 등을 규정함을 목적으로 합니다.</p>
           </section>
 
           <section className="space-y-3">

@@ -23,6 +23,6 @@ describe("formatTextWithLineBreaks", () => {
 
   it("should return empty array for null or empty string", () => {
     expect(formatTextWithLineBreaks("")).toEqual([]);
-    expect(formatTextWithLineBreaks(null as any)).toEqual([]);
+    expect(formatTextWithLineBreaks(null as unknown as string)).toEqual([]);
   });
 });

@@ -6,10 +6,15 @@ import { Button } from '@/components/ui/button';
 import Matcher from '@/components/features/Matcher';
 import { toast } from 'sonner';
 
+interface MatchResult {
+  score: number;
+  analysis_text: string;
+}
+
 export default function MatchPage() {
   const [sourceId, setSourceId] = useState('');
   const [targetId, setTargetId] = useState('');
-  const [result, setResult] = useState<any>(null);
+  const [result, setResult] = useState<MatchResult | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   const handleMatch = async () => {

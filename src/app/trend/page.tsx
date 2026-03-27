@@ -4,9 +4,15 @@ import React, { useEffect, useState } from 'react';
 import TrendDashboard from '@/components/features/Trend';
 import { BarChart3, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { PersonaDistribution } from '@/types/viral';
+
+interface TrendStats {
+  distributions: PersonaDistribution[];
+  last_updated: string;
+}
 
 export default function TrendPage() {
-  const [stats, setStats] = useState<any>(null);
+  const [stats, setStats] = useState<TrendStats | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   const fetchStats = async (refresh = false) => {

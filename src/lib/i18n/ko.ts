@@ -76,9 +76,13 @@ export const ko = {
     },
     analyzingConfig: "AI가 당신의 스타일을 분석하고 있습니다. 잠시만 기다려주세요...",
     loading: {
-      uploading: "이미지를 처리하고 있습니다...",
-      analyzing: "AI가 퍼스널 컬러와 스타일을 분석 중입니다...",
-      generating: "분석 결과를 정리하고 있습니다...",
+      uploading: "데이터 준비 중...",
+      normalizing: "조명 및 대비 최적화 중...",
+      decomposing: "시각 요소 분석 중 (헤어, 얼굴형, 체형)...",
+      analyzing: "AI 페르소나 엔진 분석 중...",
+      extracting: "상세 스타일 데이터 추출 중...",
+      generating: "맞춤형 스타일링 제안 생성 중...",
+      finalizing: "페르소나 리포트 완성 중...",
     },
     upload: {
       drop: "사진을 여기에 놓으세요",

@@ -89,7 +89,7 @@ export async function POST(request: NextRequest) {
       .insert({
         analysis_id,
         user_id: user.id,
-        deep_analysis_json: deepAnalysisJson as any, // DB stores as JSONB
+        deep_analysis_json: deepAnalysisJson as unknown as Record<string, unknown>, // DB stores as JSONB
         payment_id: transaction?.id || null,
       })
       .select()

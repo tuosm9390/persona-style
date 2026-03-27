@@ -6,19 +6,19 @@ import { Loader2, Sparkles, ShieldCheck, Zap } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 
+const steps = [
+  { icon: <ShieldCheck className="h-5 w-5" />, text: "결제 정보를 확인하고 있습니다..." },
+  { icon: <Zap className="h-5 w-5" />, text: "Gemini 2.5 Pro 모델을 연결 중입니다..." },
+  { icon: <Sparkles className="h-5 w-5" />, text: "당신만을 위한 심층 브랜드 전략을 수립하고 있습니다..." },
+  { icon: <Loader2 className="h-5 w-5 animate-spin" />, text: "고해상도 PDF 리포트를 생성하고 있습니다..." },
+];
+
 function PremiumLoadingContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const analysisId = searchParams.get("analysis_id");
   const paymentId = searchParams.get("payment_id");
   const [step, setStep] = useState(0);
-
-  const steps = [
-    { icon: <ShieldCheck className="h-5 w-5" />, text: "결제 정보를 확인하고 있습니다..." },
-    { icon: <Zap className="h-5 w-5" />, text: "Gemini 2.5 Pro 모델을 연결 중입니다..." },
-    { icon: <Sparkles className="h-5 w-5" />, text: "당신만을 위한 심층 브랜드 전략을 수립하고 있습니다..." },
-    { icon: <Loader2 className="h-5 w-5 animate-spin" />, text: "고해상도 PDF 리포트를 생성하고 있습니다..." },
-  ];
 
   useEffect(() => {
     if (!analysisId) {

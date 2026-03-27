@@ -1,7 +1,8 @@
-import { generatePDF } from '../pdf';
+import { describe, it, expect } from 'vitest';
+import { generatePDFStream } from '../pdf';
 
 describe('PDF Generation Service', () => {
   it('should be defined', () => {
-    expect(generatePDF).toBeDefined();
+    expect(generatePDFStream).toBeDefined();
   });
 });

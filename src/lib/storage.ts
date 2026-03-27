@@ -4,10 +4,7 @@ export function getShareImageUrl(analysisId: string): string {
   return `${process.env.NEXT_PUBLIC_SITE_URL || ""}/api/share/${analysisId}`;
 }
 
-export async function uploadGeneratedImage(
-  analysisId: string,
-  imageBuffer: Buffer,
-) {
+export async function uploadGeneratedImage() {
   // TODO: Supabase Storage에 이미지를 영구 저장하는 로직 (필요 시)
   // 현재는 Satori를 이용한 실시간 동적 생성을 우선함
 }

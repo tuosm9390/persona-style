@@ -2,7 +2,7 @@
 
 import { Header } from "@/components/layout/Header";
 import { motion } from "framer-motion";
-import { Sparkles, Brain, Heart, ShieldCheck } from "lucide-react";
+import { Brain, Heart, ShieldCheck } from "lucide-react";
 
 export default function AboutPage() {
   return (
@@ -78,7 +78,7 @@ export default function AboutPage() {
           >
             <h2 className="text-2xl font-bold font-display mb-4">Our Story</h2>
             <p className="text-muted-foreground leading-loose">
-              우리는 "나에게 정말 어울리는 옷은 무엇일까?"라는 단순한 질문에서
+              우리는 &quot;나에게 정말 어울리는 옷은 무엇일까?&quot;라는 단순한 질문에서
               시작했습니다. 수많은 트렌드 속에서 자신만의 색깔을 잃어버리기 쉬운
               요즘, PersonaStyle은 기술을 통해 개개인의 고유한 아름다움을
               재조명하고자 합니다. 당신이 누구든지, 어디에 있든지, PersonaStyle과

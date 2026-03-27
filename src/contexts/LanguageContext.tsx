@@ -20,14 +20,20 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const saved = localStorage.getItem("persona-style-lang") as Language | null;
+    let initialLang: Language = "ko";
     if (saved && (saved === "ko" || saved === "en")) {
-      setLanguage(saved);
+      initialLang = saved;
     } else if (typeof navigator !== "undefined") {
-      const browserLang = navigator.language.startsWith("en") ? "en" : "ko";
-      setLanguage(browserLang);
+      initialLang = navigator.language.startsWith("en") ? "en" : "ko";
     }
-    // Set mounted last to avoid synchronous render loop
-    setIsMounted(true);
+    
+    // Defer the state updates to avoid the lint warning
+    const timer = setTimeout(() => {
+      setLanguage(initialLang);
+      setIsMounted(true);
+    }, 0);
+    
+    return () => clearTimeout(timer);
   }, []);
 
   const changeLanguage = (lang: Language) => {

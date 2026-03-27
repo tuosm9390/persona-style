@@ -78,9 +78,13 @@ export const en: Translations = {
     },
     analyzingConfig: "AI is analyzing your style. Please wait a moment...",
     loading: {
-      uploading: "Processing your image...",
-      analyzing: "AI is analyzing your personal color and style...",
-      generating: "Finalizing your results...",
+      uploading: "Preparing data...",
+      normalizing: "Optimizing lighting & contrast...",
+      decomposing: "Analyzing visual components (hair, face, body)...",
+      analyzing: "Analyzing via AI Persona Engine...",
+      extracting: "Extracting detailed style data...",
+      generating: "Generating personalized styling suggestions...",
+      finalizing: "Finalizing your persona report...",
     },
     upload: {
       drop: "Drop your photo here",

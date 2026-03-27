@@ -1,14 +1,13 @@
 "use client";
 
 import * as React from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion, type Variants } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
   Sparkles,
   Palette,
   Shirt,
-  ListChecks,
   ChevronRight,
   ArrowLeft,
   Circle,
@@ -45,12 +44,12 @@ interface AnalysisResultDisplayProps {
   premiumReportId?: string;
 }
 
-const sectionVariants = {
+const sectionVariants: Variants = {
   hidden: { opacity: 0, y: 20 },
   visible: (i: number) => ({
     opacity: 1,
     y: 0,
-    transition: { delay: i * 0.1, duration: 0.5, ease: "easeOut" as const },
+    transition: { delay: i * 0.1, duration: 0.5, ease: "easeOut" },
   }),
 };
 
@@ -139,6 +138,7 @@ function getFashionIcon(type: string) {
   }
 }
 
+import Image from "next/image";
 import { toPng } from "html-to-image";
 import { X, Save } from "lucide-react";
 
@@ -233,11 +233,13 @@ export function AnalysisResultDisplay({
                   <X className="h-5 w-5" />
                 </button>
               </div>
-              <div className="p-6 bg-muted/30 flex justify-center">
-                <img
+              <div className="p-6 bg-muted/30 flex justify-center relative aspect-[9/16]">
+                <Image
                   src={previewImage}
                   alt="Preview"
-                  className="w-full h-auto rounded-xl shadow-lg border"
+                  fill
+                  className="rounded-xl shadow-lg border object-contain"
+                  unoptimized
                 />
               </div>
               <div className="p-6 space-y-3">

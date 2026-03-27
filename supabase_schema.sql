@@ -153,6 +153,15 @@ CREATE POLICY "Users can view their own transactions"
 ON payment_transactions FOR SELECT 
 USING (auth.uid() = user_id);
 
+CREATE POLICY "Users can update their own transactions" 
+ON payment_transactions FOR UPDATE 
+USING (auth.uid() = user_id);
+
 -- 14. Storage Bucket 설정 안내 (SQL로 직접 생성이 제한될 수 있으므로 주석으로 기록)
 -- insert into storage.buckets (id, name, public) values ('premium_pdfs', 'premium_pdfs', false);
 -- CREATE POLICY "Premium PDF Access" ON storage.objects FOR SELECT USING (bucket_id = 'premium_pdfs' AND auth.uid() = owner);
+
+-- 15. 추가 RLS 정책 (Insert)
+CREATE POLICY "Users can insert their own premium reports" 
+ON premium_reports FOR INSERT 
+WITH CHECK (auth.uid() = user_id);

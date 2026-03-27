@@ -58,11 +58,20 @@ export default function AnalyzePage() {
     setLoadingStep("uploading");
 
     try {
-      // Short delay to show uploading state
-      await new Promise((resolve) => setTimeout(resolve, 800));
+      // Step 1: Uploading/Preparing
+      await new Promise((resolve) => setTimeout(resolve, 600));
+      
+      if (imageBase64) {
+        setLoadingStep("normalizing");
+        await new Promise((resolve) => setTimeout(resolve, 800));
+        setLoadingStep("decomposing");
+        await new Promise((resolve) => setTimeout(resolve, 800));
+      }
 
       setLoadingStep("analyzing");
-      const response = await fetch("/api/analyze", {
+      
+      // Start the actual API call
+      const analysisPromise = fetch("/api/analyze", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -72,6 +81,23 @@ export default function AnalyzePage() {
         }),
       });
 
+      // If it takes too long, update to "extracting"
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error("STILL_ANALYZING")), 4000)
+      );
+
+      let response;
+      try {
+        response = await Promise.race([analysisPromise, timeoutPromise]) as Response;
+      } catch (err: unknown) {
+        if (err instanceof Error && err.message === "STILL_ANALYZING") {
+          setLoadingStep("extracting");
+          response = await analysisPromise;
+        } else {
+          throw err;
+        }
+      }
+
       const data = await response.json();
 
       if (!response.ok) {
@@ -79,14 +105,16 @@ export default function AnalyzePage() {
       }
 
       setLoadingStep("generating");
-      // Simulate finishing step
       await new Promise((resolve) => setTimeout(resolve, 800));
+      
+      setLoadingStep("finalizing");
+      await new Promise((resolve) => setTimeout(resolve, 600));
 
       // Save to history and get the final ID (Supabase UUID or local ID)
       const inputType =
         imageBase64 && text ? "combined" : imageBase64 ? "photo" : "text";
 
-      let finalResult = { ...data.result };
+      const finalResult = { ...data.result };
       if (typeof window !== "undefined") {
         const { saveAnalysisToHistory } = await import("@/lib/history");
         const savedId = await saveAnalysisToHistory(data.result, inputType);

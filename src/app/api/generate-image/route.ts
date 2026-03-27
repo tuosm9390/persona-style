@@ -41,7 +41,7 @@ async function withRetry<T>(
         throw error;
       }
 
-      let delayMs = BASE_DELAY_MS * Math.pow(2, attempt);
+      const delayMs = BASE_DELAY_MS * Math.pow(2, attempt);
       console.log(
         `⚠️ ${isServiceUnavailable ? 'Server busy' : 'Rate limited'}. Attempt ${attempt + 1}/${maxRetries}. Waiting ${Math.round(delayMs / 1000)}s...`
       );
@@ -126,9 +126,8 @@ export async function POST(request: NextRequest) {
 
   } catch (error: unknown) {
     console.error("Image generation error:", error);
-    const err = error as any; // Safe cast for property access after checking
-
-    const statusCode = err.status || 500;
+    const err = error instanceof Error ? error : new Error(String(error));
+    const statusCode = (err && typeof err === 'object' && 'status' in err) ? (err as { status: number }).status : 500;
     const message = err.message || "";
 
     // Detailed error classification

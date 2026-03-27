@@ -24,7 +24,7 @@ const getBgColorForSeason = (season: string) => {
 
 export function FeedCard({ item, index }: FeedCardProps) {
   const { t } = useLanguage();
-  const [likes, setLikes] = React.useState((item as any).share_count || 0);
+  const [likes, setLikes] = React.useState(item.share_count || 0);
   const [isLiked, setIsDark] = React.useState(false);
   const bgColor = getBgColorForSeason(item.result.analysis.colorSeason);
   const isDark = bgColor.includes("0.3");

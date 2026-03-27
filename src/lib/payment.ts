@@ -1,3 +1,4 @@
+import { logger } from "./logger";
 import { SupabaseClient } from "@supabase/supabase-js";
 
 /**
@@ -20,7 +21,10 @@ export async function createTransaction(
     .select()
     .maybeSingle(); // Safe return
 
-  if (error) throw error;
+  if (error) {
+    logger.error("Create transaction failed:", error);
+    throw error;
+  }
   return data;
 }
 
@@ -32,11 +36,8 @@ export async function verifyPayment(
   imp_uid: string,
   merchant_uid: string,
 ) {
-  // In development, we skip actual Portone API call and trust the response
-  const isDev = process.env.NODE_ENV === "development";
-
   // 1. Fetch transaction
-  console.log('VerifyPayment: Fetching merchant_uid:', merchant_uid);
+  logger.info('VerifyPayment: Fetching merchant_uid:', { merchant_uid });
   
   const { data: transaction, error } = await supabase
     .from('payment_transactions')
@@ -45,22 +46,22 @@ export async function verifyPayment(
     .maybeSingle();
 
   if (error) {
-    console.error('VerifyPayment: DB query error:', error);
+    logger.error('VerifyPayment: DB query error:', error);
     throw error;
   }
 
   if (!transaction) {
-    console.error('VerifyPayment: Not found in DB. RLS issue suspected.');
+    logger.warn('VerifyPayment: Not found in DB. RLS issue suspected.', { merchant_uid });
     // Check if user is seen by server
     const { data: { user } } = await supabase.auth.getUser();
     throw new Error(`주문 번호(${merchant_uid})를 찾을 수 없습니다. (Server User: ${user?.id || 'None'})`);
   }
 
   // 2. Validate (Mocked for dev)
-  console.log('VerifyPayment: Found transaction, updating status...');
+  logger.info('VerifyPayment: Found transaction, updating status...');
 
   // 3. Update status
-  console.log('VerifyPayment: Updating status to paid for ID:', transaction.id);
+  logger.info('VerifyPayment: Updating status to paid', { id: transaction.id });
   const { data: updated, error: updateError } = await supabase
     .from("payment_transactions")
     .update({
@@ -73,12 +74,12 @@ export async function verifyPayment(
     .maybeSingle();
 
   if (updateError) {
-    console.error('VerifyPayment: Update failed:', updateError);
+    logger.error('VerifyPayment: Update failed:', updateError);
     throw new Error(`결제 상태 업데이트에 실패했습니다: ${updateError.message}`);
   }
 
   if (!updated) {
-    console.error('VerifyPayment: Update succeeded but no data returned. Check RLS UPDATE policy.');
+    logger.error('VerifyPayment: Update succeeded but no data returned. Check RLS UPDATE policy.');
     throw new Error('결제 정보를 갱신했으나 데이터를 가져올 수 없습니다. RLS UPDATE 정책을 확인해주세요.');
   }
 
