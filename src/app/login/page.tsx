@@ -19,6 +19,10 @@ export default function LoginPage() {
   const router = useRouter();
   const supabase = React.useMemo(() => createClient(), []);
 
+  const getAuthRedirectUrl = React.useCallback(() => {
+    return `${window.location.origin}/auth/callback`;
+  }, []);
+
   // 이미 로그인되어 있으면 홈으로 리다이렉트
   React.useEffect(() => {
     if (user) {
@@ -31,9 +35,7 @@ export default function LoginPage() {
     if (!email) return;
 
     setIsLoading(true);
-    const redirectUrl = process.env.NEXT_PUBLIC_APP_URL 
-      ? `${process.env.NEXT_PUBLIC_APP_URL}/auth/callback`
-      : `${window.location.origin}/auth/callback`;
+    const redirectUrl = getAuthRedirectUrl();
 
     try {
       const { error } = await supabase.auth.signInWithOtp({
@@ -54,9 +56,7 @@ export default function LoginPage() {
       };
 
       const handleSocialLogin = async (provider: 'github' | 'google') => {
-      const redirectUrl = process.env.NEXT_PUBLIC_APP_URL 
-        ? `${process.env.NEXT_PUBLIC_APP_URL}/auth/callback`
-        : `${window.location.origin}/auth/callback`;
+      const redirectUrl = getAuthRedirectUrl();
       
       console.log(`Attempting ${provider} login with redirectUrl: ${redirectUrl}`);
 
